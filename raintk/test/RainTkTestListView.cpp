@@ -30,7 +30,7 @@
 namespace {
     std::random_device rd;
     std::mt19937 mt(rd());
-    std::uniform_int_distribution<uint> dis(0,6); // [0,1] // float r = mm(0.5*(dis(mt)));
+    std::uniform_int_distribution<uint> dis(2,8); // [2,8] // float r = mm(0.5*(dis(mt)));
 
     // some colors
     glm::u8vec3 g_color_yellow{242,209,91};
@@ -69,7 +69,7 @@ namespace raintk
             m_text->UpdateHierarchy(); // We need the final text height
 
             m_rect->width = this->GetParent()->width.Get();
-            m_rect->height = m_text->height.Get();
+            m_rect->height = m_text->height.Get() + mm(0.5*(dis(mt)));
 
             width = m_rect->width.Get();
             height = m_rect->height.Get();
@@ -171,6 +171,30 @@ namespace raintk
         using ListDelegates =
             std::vector<shared_ptr<DelegateType>>;
 
+        class ContentPosition
+        {
+        public:
+            ContentPosition(Property<float>* property,
+                            std::function<void(float)> setter) :
+                m_property(property),
+                m_setter(std::move(setter))
+            {}
+
+            void Assign(float val)
+            {
+                m_setter(val);
+            }
+
+            float Get()
+            {
+                return m_property->Get();
+            }
+
+        private:
+            Property<float>* m_property;
+            std::function<void(float)> m_setter;
+        };
+
         shared_ptr<ListModel<ItemType>> m_list_model;
 
         // * Connections
@@ -207,7 +231,8 @@ namespace raintk
 
         Property<float>* m_view_size;
         Property<float>* m_content_size;
-        Property<float>* m_content_position;
+        unique_ptr<ContentPosition> m_content_position;
+
 
         // * The average height or width of a delegate, used
         //   to estimate the dimensions of the content_parent
@@ -240,6 +265,7 @@ namespace raintk
             name+".spacing",0.0f
         };
 
+        // TODO Should this be a template parameter instead?
         Property<ListViewProperties::Layout> layout{
             name+".layout",ListViewProperties::Layout::Column
         };
@@ -643,7 +669,11 @@ namespace raintk
             {
                 m_view_size = &(height);
                 m_content_size = &(m_content_parent->height);
-                m_content_position = &(m_content_parent->y);
+
+                m_content_position =
+                        make_unique<ContentPosition>(
+                            &(m_content_parent->y),
+                            [this](float val){ this->SetContentY(val); });
 
                 m_delegate_bounds_start = &(m_delegate_bounds_top);
                 m_delegate_bounds_end = &(m_delegate_bounds_bottom);
@@ -667,7 +697,11 @@ namespace raintk
             {
                 m_view_size = &(width);
                 m_content_size = &(m_content_parent->width);
-                m_content_position = &(m_content_parent->x);
+
+                m_content_position =
+                        make_unique<ContentPosition>(
+                            &(m_content_parent->x),
+                            [this](float val){ this->SetContentX(val); });
 
                 m_delegate_bounds_start = &(m_delegate_bounds_left);
                 m_delegate_bounds_end = &(m_delegate_bounds_right);
@@ -753,10 +787,6 @@ namespace raintk
                 calcAverageDelegateSize();
                 updateContentParentSize();
 
-                // Clamp the current position to be within the
-                // content size
-                clampContentPositionToSize();
-
                 // Get model index based on content position
                 float estimated_model_index =
                         (m_content_position->Get()*-1.0f)/
@@ -777,7 +807,6 @@ namespace raintk
             correctDelegatePositions();
             calcAverageDelegateSize();
             updateContentParentSize();
-            clampContentPositionToSize();
         }
 
         shared_ptr<DelegateType> createDelegate(uint model_index)
@@ -899,14 +928,18 @@ namespace raintk
         void correctDelegatePositions()
         {
             auto& first_delegate = m_list_delegates.front();
+            bool require_shift = false;
 
-            bool require_shift =
-
-                    (first_delegate->GetIndex()==0 &&
-                     m_get_delegate_position(first_delegate) > 0.0f) ||
-
-                    (m_delegate_bounds_start->Get() < 0.0f);
-
+            if(first_delegate->GetIndex()==0)
+            {
+                require_shift = (fabs(m_get_delegate_position(first_delegate)) > 1E-1);
+            }
+            else
+            {
+                // If content position 0.0f is within the delegate bounds
+                // but the first delegate isn't index 0
+                require_shift = (m_delegate_bounds_start->Get() < 0.0f);
+            }
 
             if(require_shift)
             {
@@ -933,30 +966,6 @@ namespace raintk
             }
         }
 
-        void clampContentPositionToSize()
-        {
-            if(m_content_size->Get() > m_view_size->Get())
-            {
-                if(m_content_position->Get() > 0)
-                {
-                    m_content_position->Assign(0);
-                }
-                else if(m_content_position->Get() <
-                        (m_view_size->Get()-m_content_size->Get()))
-                {
-                    m_content_position->Assign(
-                                m_view_size->Get()-m_content_size->Get());
-                }
-            }
-            else
-            {
-                if(m_content_position->Get() != 0)
-                {
-                    m_content_position->Assign(0);
-                }
-            }
-        }
-
         void updateContentParentSize()
         {
             float estimated_size =
@@ -980,14 +989,21 @@ namespace raintk
             if(last_delegate->GetIndex() ==
                     m_list_model->GetSize()-1)
             {
-                m_content_size->Assign(last_delegate_end);
+                if(m_content_size->Get() != last_delegate_end)
+                {
+                    m_content_size->Assign(last_delegate_end);
+                }
             }
             else
             {
-                m_content_size->Assign(
-                            std::max(
-                                last_delegate_end,
-                                estimated_size));
+                auto new_size =
+                        std::max(last_delegate_end,
+                                 estimated_size);
+
+                if(m_content_size->Get() != new_size)
+                {
+                    m_content_size->Assign(new_size);
+                }
             }
         }
 
@@ -1252,16 +1268,16 @@ int main(int argc, char* argv[])
     (void)argc;
     (void)argv;
 
-    TestContext c(480,800);
+    TestContext c(600,800);
     auto root = c.scene->GetRootWidget();
 //    c.scene->SetShowDebugText(false);
 
     // ListModel
     auto list_model = make_shared<ListModelSTLVector<TestItem>>();
-//    for(uint i=0; i < 5; i++)
-//    {
-//        list_model->PushBack(TestItem{glm::u8vec3{96,200,90}});
-//    }
+    for(uint i=0; i < 25; i++)
+    {
+        list_model->PushBack(TestItem{glm::u8vec3{96,200,90}});
+    }
 
 
     // Create add buttons
@@ -1369,7 +1385,7 @@ int main(int argc, char* argv[])
 
     list_view_bgbg->width = mm(60);
     list_view_bgbg->height = mm(150);
-    list_view_bgbg->x = 0.5*(root->width.Get()-list_view_bgbg->width.Get());
+    list_view_bgbg->x = mm(10);
     list_view_bgbg->y = 0.5*(root->height.Get()-list_view_bgbg->height.Get());
     list_view_bgbg->z = mm(0.5);
     list_view_bgbg->color = glm::u8vec3(30,60,60);
@@ -1381,7 +1397,7 @@ int main(int argc, char* argv[])
 
     list_view_bg->width = mm(60);
     list_view_bg->height = mm(100);
-    list_view_bg->x = 0.5*(root->width.Get()-list_view_bg->width.Get());
+    list_view_bg->x = mm(10);
     list_view_bg->y = 0.5*(root->height.Get()-list_view_bg->height.Get());
     list_view_bg->z = 1.0;
     list_view_bg->color = glm::u8vec3(60,60,60);
@@ -1487,6 +1503,36 @@ int main(int argc, char* argv[])
             };
 
     scroll_grip->z = mm(1.0f);
+
+
+    // Content Parent Stats
+    auto ctp_desc = MakeWidget<Text>(root,"");
+    ctp_desc->x = list_view_bgbg->x.Get() + list_view_bgbg->width.Get() + mm(10);
+    ctp_desc->y = list_view_bgbg->y.Get() + mm(35);
+    ctp_desc->color = glm::u8vec3(255,255,255);
+    ctp_desc->text = "Content Parent";
+    ctp_desc->font = "FiraSansMinimal.ttf";
+
+    auto ctp_y = MakeWidget<Text>(root,"");
+    ctp_y->x = ctp_desc->x.Get();
+    ctp_y->y = ctp_desc->y.Get() + mm(10);
+    ctp_y->color = glm::u8vec3(255,255,255);
+    ctp_y->text = [&](){
+        auto y = list_view->GetContentParent()->y.Get();
+        return std::string("Y: ")+ks::ToString(y);
+    };
+    ctp_y->font = "FiraSansMinimal.ttf";
+
+    auto ctp_h = MakeWidget<Text>(root,"");
+    ctp_h->x = ctp_desc->x.Get();
+    ctp_h->y = ctp_y->y.Get() + mm(10);
+    ctp_h->color = glm::u8vec3(255,255,255);
+    ctp_h->text = [&](){
+        auto h = list_view->GetContentParent()->height.Get();
+        return std::string("H: ")+ks::ToString(h);
+    };
+    ctp_h->font = "FiraSansMinimal.ttf";
+
 
 
     // Run!
