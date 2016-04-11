@@ -20,6 +20,7 @@
 #include <raintk/RainTkImage.hpp>
 #include <raintk/RainTkScrollArea.hpp>
 #include <raintk/RainTkScrollBar.hpp>
+#include <raintk/RainTkAnimation.hpp>
 
 namespace raintk
 {
@@ -35,6 +36,52 @@ namespace raintk
                     return shared_ptr<ks::ImageData>(
                                 img.ConvertToImageDataPtr().release());
                 };
+
+
+        class SizeAnimation : public raintk::Animation
+        {
+        public:
+            using base_type = raintk::Animation;
+
+            SizeAnimation(ks::Object::Key const &key,
+                          Scene* scene) :
+                Animation(key,scene)
+            {}
+
+            void Init(ks::Object::Key const &,
+                      shared_ptr<SizeAnimation> const &)
+            {}
+
+            ~SizeAnimation()
+            {}
+
+            float from;
+            float to;
+            float duration;
+            Property<float>* property;
+
+        private:
+            void start() override
+            {
+                m_time = 0;
+            }
+
+            bool update(float delta_ms) override
+            {
+                m_time += delta_ms;
+
+                // k is [0,1]
+                float k = sin(m_time*0.05f * (k_pi/180.0f)) + 1.0f;
+                property->Assign(from + k*(to-from));
+
+                return false;
+            }
+
+            void complete() override
+            {}
+
+            float m_time;
+        };
     }
 }
 
@@ -53,38 +100,38 @@ int main(int argc, char* argv[])
 
     // When content area is smaller than scroll area
 
-    auto rect_left = MakeWidget<Rectangle>(root,"rl");
-    rect_left->width = root->width.Get()*0.25f;
-    rect_left->height = root->height.Get();
-    rect_left->x = 0.0f;
-    rect_left->y = 0.0f;
-    rect_left->z = 1;
-    rect_left->color = glm::vec3(80,60,60);
+    auto rect_tl = MakeWidget<Rectangle>(root,"rl");
+    rect_tl->width = root->width.Get()*0.33f;
+    rect_tl->height = root->height.Get()*0.5f;
+    rect_tl->x = 0.0f;
+    rect_tl->y = 0.0f;
+    rect_tl->z = 1;
+    rect_tl->color = glm::vec3(80,60,60);
 
 
-    auto scroll_area_left =
+    auto scroll_area_tl =
             MakeWidget<ScrollArea>(
-                rect_left,"scroll_area_left");
+                rect_tl,"scroll_area_tl");
 
-    scroll_area_left->width = rect_left->width.Get();
-    scroll_area_left->height = rect_left->height.Get();
-    scroll_area_left->clip = true;
-    scroll_area_left->direction = ScrollArea::Direction::HorizontalAndVertical;
-    scroll_area_left->GetContentParent()->width = scroll_area_left->width.Get()*0.75;
-    scroll_area_left->GetContentParent()->height = scroll_area_left->width.Get()*0.75;
-    scroll_area_left->flick = true;
+    scroll_area_tl->width = rect_tl->width.Get();
+    scroll_area_tl->height = rect_tl->height.Get();
+    scroll_area_tl->clip = true;
+    scroll_area_tl->direction = ScrollArea::Direction::HorizontalAndVertical;
+    scroll_area_tl->GetContentParent()->width = scroll_area_tl->width.Get()*0.75;
+    scroll_area_tl->GetContentParent()->height = scroll_area_tl->width.Get()*0.75;
+    scroll_area_tl->flick = true;
 
 
-    auto image_left =
+    auto image_tl =
             MakeWidget<Image>(
-                scroll_area_left->GetContentParent(),
-                "image_left");
+                scroll_area_tl->GetContentParent(),
+                "image_tl");
 
-    image_left->width = scroll_area_left->GetContentParent()->width.Get();
-    image_left->height = scroll_area_left->GetContentParent()->height.Get();
-    image_left->z = 0.1;
-    image_left->smooth = true;
-    image_left->source =
+    image_tl->width = scroll_area_tl->GetContentParent()->width.Get();
+    image_tl->height = scroll_area_tl->GetContentParent()->height.Get();
+    image_tl->z = 0.1;
+    image_tl->smooth = true;
+    image_tl->source =
             Image::Source{
                 Image::Source::Lifetime::Permanent,
                 raintk::test::sun_nasa_png_loader
@@ -92,12 +139,65 @@ int main(int argc, char* argv[])
 
     // =========================================================== //
 
+    // Animate content area lager than view <---> content area smaller than view
+    auto rect_bl = MakeWidget<Rectangle>(root,"bl");
+    rect_bl->width = root->width.Get()*0.33;
+    rect_bl->height = root->height.Get()*0.5;
+    rect_bl->x = 0.0f;
+    rect_bl->y = rect_bl->height.Get();
+    rect_bl->z = 1;
+    rect_bl->color = glm::vec3(60,80,60);
+
+    Property<float> animated_size{"",scroll_area_tl->width.Get()*0.75};
+
+
+    auto scroll_area_bl =
+            MakeWidget<ScrollArea>(
+                rect_bl,"scroll_area_bl");
+
+    scroll_area_bl->width = rect_bl->width.Get();
+    scroll_area_bl->height = rect_bl->height.Get();
+    scroll_area_bl->clip = true;
+    scroll_area_bl->direction = ScrollArea::Direction::HorizontalAndVertical;
+    scroll_area_bl->flick = true;
+    scroll_area_bl->GetContentParent()->width = [&](){ return animated_size.Get(); };
+    scroll_area_bl->GetContentParent()->height = [&](){ return animated_size.Get(); };
+
+
+    auto size_anim =
+            ks::MakeObject<test::SizeAnimation>(
+                c.scene.get());
+
+    size_anim->from = scroll_area_tl->width.Get()*0.75;
+    size_anim->to = scroll_area_tl->width.Get()*2.75;
+    size_anim->duration = 1000;
+    size_anim->property = &animated_size;
+    size_anim->Start();
+
+
+    auto image_bl =
+            MakeWidget<Image>(
+                scroll_area_bl->GetContentParent(),
+                "image_bl");
+
+    image_bl->width = [&](){ return scroll_area_bl->GetContentParent()->width.Get(); };
+    image_bl->height = [&](){ return scroll_area_bl->GetContentParent()->height.Get(); };
+    image_bl->z = 0.1;
+    image_bl->smooth = true;
+    image_bl->source =
+            Image::Source{
+            Image::Source::Lifetime::Permanent,
+            raintk::test::sun_nasa_png_loader
+        };
+
+    // =========================================================== //
+
     // When content area is larger than scroll area
 
     auto rect_right = MakeWidget<Rectangle>(root,"rect_right");
-    rect_right->width = root->width.Get()*0.75f;
+    rect_right->width = root->width.Get()*0.66f;
     rect_right->height = root->height.Get();
-    rect_right->x = root->width.Get()*0.25f;
+    rect_right->x = root->width.Get()*0.33f;
     rect_right->y = 0.0f;
     rect_right->z = 1;
     rect_right->color = glm::vec3(60,80,60);
@@ -159,3 +259,4 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+

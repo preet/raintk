@@ -96,6 +96,8 @@ void CreateVerticalScrollAreas(shared_ptr<Widget> p)
         vsa->direction = ScrollArea::Direction::Vertical;
         vsa->flick = true;
         vsa->z = mm(-1.0f);
+        vsa->GetContentParent()->width = vsa->width.Get();
+        vsa->GetContentParent()->height = vsa->height.Get();
         vsa->clip = true;
 
         CreateButtonColumn(vsa->GetContentParent());

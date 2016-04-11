@@ -94,6 +94,14 @@ namespace raintk
         // be set to 0
         void ClampContentToView();
 
+        // These setters should be used to set the ContentParent's
+        // position instead of setting properties directly on the
+        // ContentParent width. This ensures that the ContentParent
+        // stays within this widget's view bounds.
+        void SetContentX(float content_x);
+        void SetContentY(float content_y);
+        void SetContentPosition(float content_x,float content_y);
+
         // Trying to add children directly to this Widget
         // will throw an exception
         void AddChild(shared_ptr<Widget> const &child) override;
@@ -120,7 +128,12 @@ namespace raintk
         void onStartScrolling();
         void onStopScrolling();
         void onContinueScrolling();
-        void onScrollMotion(glm::vec2 const &v);
+
+        void checkContentPositionChange();
+
+        // @diff is the position difference
+        void requestContentPositionChange(glm::vec2 const &diff);
+
         bool verifyScrollStart();
         Response handleInput(Point const &new_point) override;
         Response handleSinglePointInput(Point const &new_point);

@@ -137,23 +137,40 @@ namespace raintk
     void ScrollArea::Init(ks::Object::Key const &,
                           shared_ptr<ScrollArea> const &this_scroll_area)
     {
+        // Create the content parent
         m_content_parent =
                 MakeWidget<Widget>(
                     this_scroll_area,
                     name+".content_parent");
 
-        // Default the ContentParent size to fill this widget
-        auto scroll_area_ptr = this_scroll_area.get();
+        // Set some default content dimensions
+        m_content_parent->width = mm(250);
+        m_content_parent->height = mm(250);
 
-        m_content_parent->width =
-                [=](){
-                    return scroll_area_ptr->width.Get();
-                };
+        // Setup connections
 
-        m_content_parent->height =
-                [=](){
-                    return scroll_area_ptr->height.Get();
-                };
+        // Ensure that any dimension changes for this
+        // widget or the content parent keep the content
+        // position within bounds
+        m_content_parent->height.signal_changed.Connect(
+                    this_scroll_area,
+                    &ScrollArea::checkContentPositionChange,
+                    ks::ConnectionType::Direct);
+
+        m_content_parent->width.signal_changed.Connect(
+                    this_scroll_area,
+                    &ScrollArea::checkContentPositionChange,
+                    ks::ConnectionType::Direct);
+
+        height.signal_changed.Connect(
+                    this_scroll_area,
+                    &ScrollArea::checkContentPositionChange,
+                    ks::ConnectionType::Direct);
+
+        width.signal_changed.Connect(
+                    this_scroll_area,
+                    &ScrollArea::checkContentPositionChange,
+                    ks::ConnectionType::Direct);
     }
 
     ScrollArea::~ScrollArea()
@@ -253,6 +270,31 @@ namespace raintk
         }
     }
 
+    void ScrollArea::SetContentX(float new_x)
+    {
+        auto const delta_x = new_x-m_content_parent->x.Get();
+
+        requestContentPositionChange(
+                    glm::vec2(delta_x,0.0f));
+    }
+
+    void ScrollArea::SetContentY(float new_y)
+    {
+        auto const delta_y = new_y-m_content_parent->y.Get();
+
+        requestContentPositionChange(
+                    glm::vec2(0.0f,delta_y));
+    }
+
+    void ScrollArea::SetContentPosition(float new_x, float new_y)
+    {
+        auto const delta_x = new_x-m_content_parent->x.Get();
+        auto const delta_y = new_y-m_content_parent->y.Get();
+
+        requestContentPositionChange(
+                    glm::vec2(delta_x,delta_y));
+    }
+
     void ScrollArea::AddChild(shared_ptr<Widget> const &child)
     {
         bool const is_content_parent =
@@ -329,7 +371,7 @@ namespace raintk
                     m_flick_anim =
                             ks::MakeObject<ScrollFlickAnimation>(
                                 m_scene,
-                                [this](glm::vec2 const &v){ onScrollMotion(v); },
+                                [this](glm::vec2 const &v){ requestContentPositionChange(v); },
                                 glm::normalize(flick_velocity),
                                 glm::length(flick_velocity),
                                 m_deceleration_m_s_2*-1.0f);
@@ -361,10 +403,15 @@ namespace raintk
 
         glm::vec2 ds((tp1.x-tp0.x),(tp1.y-tp0.y));
 
-        onScrollMotion(ds);
+        requestContentPositionChange(ds);
     }
 
-    void ScrollArea::onScrollMotion(glm::vec2 const &v)
+    void ScrollArea::checkContentPositionChange()
+    {
+        requestContentPositionChange(glm::vec2(0.0f,0.0f));
+    }
+
+    void ScrollArea::requestContentPositionChange(glm::vec2 const &v)
     {
         u8 const direction_val = u8(direction.Get());
 
@@ -393,6 +440,13 @@ namespace raintk
 
                 m_content_parent->x = new_x;
             }
+            else
+            {
+                if(m_content_parent->x.Get() != 0.0f)
+                {
+                    m_content_parent->x = 0.0f;
+                }
+            }
         }
         if((u8(Direction::Vertical) & direction_val) > 0)
         {
@@ -416,6 +470,13 @@ namespace raintk
 
                 m_content_parent->y = new_y;
             }
+            else
+            {
+                if(m_content_parent->y.Get() != 0.0f)
+                {
+                    m_content_parent->y = 0.0f;
+                }
+            }
         }
 
 
@@ -423,10 +484,11 @@ namespace raintk
         {
             if((x_edge_reached && v.y==0) || (y_edge_reached && v.x==0))
             {
-                // Stop the animation if both bounds have been reached.
+                // Stop the animation if either bound has been reached.
                 // This also allows input events to pass through to widgets
                 // below without having to wait for the animation to stop
                 m_flick_anim->Stop();
+                m_flick_anim->Remove();
             }
         }
     }
@@ -469,6 +531,7 @@ namespace raintk
                m_flick_anim->GetState()==Animation::State::Running)
             {
                 m_flick_anim->Stop();
+                m_flick_anim->Remove();
 
                 // We used the input to stop the flick anim
                 // so it shouldn't be used for anything else
@@ -640,6 +703,7 @@ namespace raintk
                     m_inside_scroll = false;
                     onStopScrolling();
                     m_flick_anim->Stop();
+                    m_flick_anim->Remove();
                 }
 
                 if(m_inside_drag)
