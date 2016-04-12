@@ -22,7 +22,7 @@
 
 namespace raintk
 {
-    namespace draw_bbox
+    namespace draw_debug
     {
         #include <raintk/shaders/color_attr_glsl.hpp>
 
@@ -296,7 +296,7 @@ namespace raintk
         m_list_gm_layouts.Add(nullptr);
 
 
-        setupBoundingBoxRendering();
+        setupDebugRendering();
     }
 
     DrawSystem::~DrawSystem()
@@ -337,6 +337,11 @@ namespace raintk
     void DrawSystem::SetShowBoundingBoxes(bool show_bboxes)
     {
         m_show_bboxes = show_bboxes;
+    }
+
+    void DrawSystem::SetShowClipOutlines(bool show_clip_outlines)
+    {
+        m_show_clip_outlines = show_clip_outlines;
     }
 
     Id DrawSystem::RegisterGeometryLayout(
@@ -474,16 +479,24 @@ namespace raintk
 
 
         // Remove old RenderData for bounding box debug
-        if(m_show_bboxes)
+        if(m_show_bboxes || m_show_clip_outlines)
         {
             // Remove old bounding box entities
-            for(auto ent_id : m_list_bbox_ent_ids)
+            for(auto ent_id : m_list_debug_ent_ids)
             {
                 m_scene->RemoveEntity(ent_id);
             }
-            m_list_bbox_ent_ids.clear();
+            m_list_debug_ent_ids.clear();
 
-            createBoundingBoxDrawData();
+            if(m_show_bboxes)
+            {
+                createBoundingBoxDrawData();
+            }
+
+            if(m_show_clip_outlines)
+            {
+                createClipOutlineDrawData();
+            }
         }
 
 
@@ -756,6 +769,67 @@ namespace raintk
         }
     }
 
+    void DrawSystem::createClipOutlineDrawData()
+    {
+        // Get widget list
+        std::vector<Widget*> stack_widgets;
+        stack_widgets.push_back(m_scene->GetRootWidget().get());
+
+        while(!stack_widgets.empty())
+        {
+            auto widget = stack_widgets.back();
+            stack_widgets.pop_back();
+
+            auto const &poly_vx =
+                    m_cmlist_xf_data->
+                    GetComponent(widget->GetEntityId()).poly_vx;
+
+            UPtrBuffer poly_vx_buffer =
+                    make_unique<std::vector<u8>>();
+
+            for(uint i=0; i < poly_vx.size(); i++)
+            {
+                auto const &vx0 = poly_vx[i];
+                auto const &vx1 = poly_vx[(i+1)%poly_vx.size()];
+
+                auto line_buffer =
+                        raintk::draw_debug::CreateLine(
+                            glm::vec4(vx0.x,vx0.y,0,1),
+                            glm::vec4(vx1.x,vx1.y,0,1),
+                            glm::u8vec4(0,255,255,255));
+
+                poly_vx_buffer->insert(
+                            poly_vx_buffer->end(),
+                            line_buffer->begin(),
+                            line_buffer->end());
+            }
+
+            auto polyvx_ent_id = m_scene->CreateEntity();
+
+            m_cmlist_draw_data->Create(
+                        polyvx_ent_id,
+                        DrawData{
+                            m_debug_draw_key,
+                            std::move(poly_vx_buffer),
+                            true
+                        });
+
+            TransformData xf_data;
+            xf_data.world_xf = glm::mat4(1.0);
+
+            m_cmlist_xf_data->Create(
+                        polyvx_ent_id,
+                        xf_data);
+
+            m_list_debug_ent_ids.push_back(polyvx_ent_id);
+
+            for(auto& child : widget->GetChildren())
+            {
+                stack_widgets.push_back(child.get());
+            }
+        }
+    }
+
     void DrawSystem::createBoundingBoxDrawData()
     {
         // Get widget list
@@ -774,22 +848,22 @@ namespace raintk
                     GetComponent(widget->GetEntityId()).bbox;
 
             auto line0_buffer =
-                    raintk::draw_bbox::CreateLine(
+                    raintk::draw_debug::CreateLine(
                         glm::vec4(bb.x0,bb.y0,0,1),
                         glm::vec4(bb.x0,bb.y1,0,1));
 
             auto line1_buffer =
-                    raintk::draw_bbox::CreateLine(
+                    raintk::draw_debug::CreateLine(
                         glm::vec4(bb.x1,bb.y0,0,1),
                         glm::vec4(bb.x1,bb.y1,0,1));
 
             auto line2_buffer =
-                    raintk::draw_bbox::CreateLine(
+                    raintk::draw_debug::CreateLine(
                         glm::vec4(bb.x0,bb.y0,0,1),
                         glm::vec4(bb.x1,bb.y0,0,1));
 
             auto line3_buffer =
-                    raintk::draw_bbox::CreateLine(
+                    raintk::draw_debug::CreateLine(
                         glm::vec4(bb.x0,bb.y1,0,1),
                         glm::vec4(bb.x1,bb.y1,0,1));
 
@@ -821,7 +895,7 @@ namespace raintk
             m_cmlist_draw_data->Create(
                         bbox_ent_id,
                         DrawData{
-                            m_bbox_draw_key,
+                            m_debug_draw_key,
                             std::move(bbox_buffer),
                             true
                         });
@@ -833,7 +907,7 @@ namespace raintk
                         bbox_ent_id,
                         xf_data);
 
-            m_list_bbox_ent_ids.push_back(bbox_ent_id);
+            m_list_debug_ent_ids.push_back(bbox_ent_id);
 
 
             for(auto& child : widget->GetChildren())
@@ -843,58 +917,58 @@ namespace raintk
         }
     }
 
-    void DrawSystem::setupBoundingBoxRendering()
+    void DrawSystem::setupDebugRendering()
     {
-        m_bbox_geometry_layout.reset(
+        m_debug_geometry_layout.reset(
                     new GeometryLayout{
                         ks::gl::VertexLayout
                         {
                             {
                                 "a_v4_position",
-                                raintk::draw_bbox::AttrType::Float,
+                                raintk::draw_debug::AttrType::Float,
                                 4,
                                 false
                             },
                             {
                                 "a_v4_color",
-                                raintk::draw_bbox::AttrType::UByte,
+                                raintk::draw_debug::AttrType::UByte,
                                 4,
                                 true
                             }
                         },
-                        sizeof(raintk::draw_bbox::Vertex),
+                        sizeof(raintk::draw_debug::Vertex),
                         50000 // buffer size: 50000 bytes
                     });
 
-        m_bbox_shader_id =
+        m_debug_shader_id =
                 RegisterShader(
                     "bbox_shader",
-                    raintk::draw_bbox::color_attr_vert_glsl,
-                    raintk::draw_bbox::color_attr_frag_glsl);
+                    raintk::draw_debug::color_attr_vert_glsl,
+                    raintk::draw_debug::color_attr_frag_glsl);
 
-        m_bbox_depth_config_id =
+        m_debug_depth_config_id =
                 RegisterDepthConfig(
                     [](ks::gl::StateSet* state_set) {
-                        state_set->SetDepthMask(GL_TRUE);
-                        state_set->SetDepthTest(GL_TRUE);
+                        state_set->SetDepthMask(GL_FALSE);
+                        state_set->SetDepthTest(GL_FALSE);
                     });
 
-        m_bbox_blend_config_id =
+        m_debug_blend_config_id =
                 RegisterBlendConfig(
                     [](ks::gl::StateSet* state_set) {
                         state_set->SetBlend(GL_FALSE);
                     });
 
-        m_bbox_geometry_layout_id =
+        m_debug_geometry_layout_id =
                 RegisterGeometryLayout(
-                    m_bbox_geometry_layout);
+                    m_debug_geometry_layout);
 
-        m_bbox_draw_key.SetShader(m_bbox_shader_id);
-        m_bbox_draw_key.SetDepthConfig(m_bbox_depth_config_id);
-        m_bbox_draw_key.SetBlendConfig(m_bbox_blend_config_id);
-        m_bbox_draw_key.SetPrimitive(ks::gl::Primitive::TriangleStrip);
-        m_bbox_draw_key.SetGeometryLayout(m_bbox_geometry_layout_id);
-        m_bbox_draw_key.SetTransparency(false);
+        m_debug_draw_key.SetShader(m_debug_shader_id);
+        m_debug_draw_key.SetDepthConfig(m_debug_depth_config_id);
+        m_debug_draw_key.SetBlendConfig(m_debug_blend_config_id);
+        m_debug_draw_key.SetPrimitive(ks::gl::Primitive::TriangleStrip);
+        m_debug_draw_key.SetGeometryLayout(m_debug_geometry_layout_id);
+        m_debug_draw_key.SetTransparency(false);
     }
 
     // ============================================================= //

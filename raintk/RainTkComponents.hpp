@@ -99,8 +99,6 @@ namespace raintk
         float y1;
     };
 
-    // TODO We can optimize this struct
-    // rotation, scale and origin are all 2d
     struct TransformData
     {
         glm::vec3 position; // 12
@@ -113,6 +111,16 @@ namespace raintk
         glm::mat4 world_xf; // 64
 
         BoundingBox bbox; // 16
+
+        // Each widget has an x,y,w,h forming a box.
+        // @list_vx holds the vertices of the box in
+        // world space [tl,bl,br,tr]
+        std::array<glm::vec2,4> list_vx; // 32
+
+        // The list of vertices for the final clipped
+        // polygon for this widget
+        // TODO small_vec
+        std::vector<glm::vec2> poly_vx;
     };
 
     using TransformDataComponentList =
@@ -148,6 +156,10 @@ namespace raintk
         // TODO add Type: KeyInput,PointerInput
         bool enabled;
         InputArea* input_area;
+
+        // The list of vertices for the final clipped polygon
+        // that a single input point will be hit tested against
+        std::vector<glm::vec2> poly_vx;
     };
 
     // TODO: We should use another container (ie one that

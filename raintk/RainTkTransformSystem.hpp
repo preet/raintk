@@ -48,8 +48,11 @@ namespace raintk
 
         static void updateWidgetTransforms(
                 Widget* widget,
-                glm::mat4 const &parent_xf,
                 UpdateDataComponentList* cmlist_upd_data,
+                TransformDataComponentList* cmlist_xf_data);
+
+        static void updateWidgetClips(
+                Widget* widget,
                 TransformDataComponentList* cmlist_xf_data);
 
         Scene* const m_scene;

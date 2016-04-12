@@ -45,8 +45,15 @@ android {
 
 INCLUDEPATH += $${PATH_RAINTK}
 
-## thirdparty
-#INCLUDEPATH += $${PATH_RAINTK}/raintk/thirdparty
+# thirdparty
+INCLUDEPATH += $${PATH_RAINTK}/raintk/thirdparty
+
+# clipper
+HEADERS += \
+    $${PATH_RAINTK}/raintk/thirdparty/clipper/clipper.hpp
+
+SOURCES += \
+    $${PATH_RAINTK}/raintk/thirdparty/clipper/clipper.cpp
 
 # shaders
 HEADERS += \
@@ -152,7 +159,7 @@ SOURCES += \
 HEADERS += \
     $${PATH_RAINTK}/raintk/test/RainTkTestContext.hpp
 
-#SOURCES += \
+SOURCES += \
 #    $${PATH_RAINTK}/raintk/test/RainTkTestDrawSystemOpaqueSingle.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestDrawSystemOpaqueMultiple.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestDrawSystemClipping.cpp
@@ -163,6 +170,7 @@ HEADERS += \
 #    $${PATH_RAINTK}/raintk/test/RainTkTestRectangle.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestAnimation.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestClipping.cpp
+    $${PATH_RAINTK}/raintk/test/RainTkTestClippingPolys.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestImage.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestRow.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestGrid.cpp

@@ -44,6 +44,7 @@ namespace raintk
 
         void SetClippingEnabled(bool enabled);
         void SetShowBoundingBoxes(bool show_bboxes);
+        void SetShowClipOutlines(bool show_clip_outlines);
 
         Id RegisterGeometryLayout(shared_ptr<GeometryLayout const> gm_layout);
         void RemoveGeometryLayout(Id gm_layout_id);
@@ -98,9 +99,11 @@ namespace raintk
                 ks::draw::Transparency transparency,
                 std::vector<Id>& list_render_ent_ids);
 
+        void createClipOutlineDrawData();
+
         void createBoundingBoxDrawData();
 
-        void setupBoundingBoxRendering();
+        void setupDebugRendering();
 
 
         Scene* const m_scene;
@@ -111,13 +114,14 @@ namespace raintk
         DrawDataComponentList* m_cmlist_draw_data;
 
         bool m_show_bboxes{false};
-        Id m_bbox_shader_id{0};
-        Id m_bbox_depth_config_id{0};
-        Id m_bbox_blend_config_id{0};
-        Id m_bbox_geometry_layout_id{0};
-        DrawKey m_bbox_draw_key;
-        shared_ptr<GeometryLayout> m_bbox_geometry_layout;
-        std::vector<Id> m_list_bbox_ent_ids;
+        bool m_show_clip_outlines{false};
+        Id m_debug_shader_id{0};
+        Id m_debug_depth_config_id{0};
+        Id m_debug_blend_config_id{0};
+        Id m_debug_geometry_layout_id{0};
+        DrawKey m_debug_draw_key;
+        shared_ptr<GeometryLayout> m_debug_geometry_layout;
+        std::vector<Id> m_list_debug_ent_ids;
 
         ks::RecycleIndexList<
             shared_ptr<GeometryLayout const>
