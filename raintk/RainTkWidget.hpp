@@ -100,6 +100,32 @@ namespace raintk
         // would be updated later are needed immediately.
         void UpdateHierarchy();
 
+
+        // Helpers
+
+        // Converts a point in world space to widget-local coords
+        static glm::vec2 CalcLocalCoords(
+                Widget* widget,
+                glm::vec2 const &world_point);
+
+        static glm::vec2 CalcWorldCoords(
+                Widget* widget,
+                glm::vec2 const &local_point);
+
+        // Determines if @world_point (ie in world coordinate
+        // space) is inside @widget
+        static bool CalcPointInside(
+                Widget* widget,
+                glm::vec2 const &world_point);
+
+        // Variant that won't calculate the local point if
+        // its already available
+        static bool CalcPointInside(
+                Widget* widget,
+                glm::vec2 const &world_point,
+                glm::vec2 const &local_point);
+
+
         // Properties
         Property<float> width{
             name+".width",0.0f

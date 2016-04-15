@@ -58,8 +58,8 @@ namespace raintk
         ks::Signal<> signal_canceled;
 
     private:
-        Response handleInput(Point const &) override;
-        void cancelInput(std::vector<Point> const &) override;
+        Response handleInput(Point const &,bool) override;
+        void cancelInput() override;
 
         bool m_inside_drag{false};
 

@@ -135,6 +135,7 @@ namespace raintk
         static u8 const UpdateWidget    = (1 << 0);
         static u8 const UpdateTransform = (1 << 1);
         static u8 const UpdateDrawables = (1 << 2);
+        static u8 const UpdateClip      = (1 << 3);
 
         UpdateData() :
             update(NoUpdates),
@@ -156,10 +157,6 @@ namespace raintk
         // TODO add Type: KeyInput,PointerInput
         bool enabled;
         InputArea* input_area;
-
-        // The list of vertices for the final clipped polygon
-        // that a single input point will be hit tested against
-        std::vector<glm::vec2> poly_vx;
     };
 
     // TODO: We should use another container (ie one that

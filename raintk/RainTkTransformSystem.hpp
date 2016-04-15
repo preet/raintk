@@ -53,6 +53,7 @@ namespace raintk
 
         static void updateWidgetClips(
                 Widget* widget,
+                UpdateDataComponentList* cmlist_upd_data,
                 TransformDataComponentList* cmlist_xf_data);
 
         Scene* const m_scene;

@@ -55,37 +55,50 @@ namespace raintk
         m_cmlist_input_data->Remove(m_entity_id);
     }
 
-    InputArea::Point InputArea::TransformPtToLocalCoords(Point const &point) const
+    void InputArea::cancelInputsBehindWidget(
+            std::vector<Point> const &list_points)
     {
-        auto xf_point = point;
+        // Convert list_points to world coords
+        std::vector<Point> list_world_pts = list_points;
+        for(auto& world_pt : list_world_pts)
+        {
+            glm::vec2 world_xy =
+                    Widget::CalcWorldCoords(
+                        this,
+                        glm::vec2(world_pt.x,world_pt.y));
 
-        // Transform the point so its in local coords
-        auto const &xf = m_cmlist_xf_data->
-                GetComponent(m_entity_id).world_xf;
+            world_pt.x = world_xy.x;
+            world_pt.y = world_xy.y;
+        }
 
-        glm::vec4 const local =
-                glm::inverse(xf)*
-                glm::vec4(xf_point.x,xf_point.y,0,1);
-
-        xf_point.x = local.x;
-        xf_point.y = local.y;
-
-        return xf_point;
-    }
-
-    void InputArea::cancelInputsBehindDepth(
-            InputSystem* input_system,
-            std::vector<Point> const &list_points,
-            float depth)
-    {
         auto const & list_input_areas_by_depth =
-                input_system->GetInputAreasByDepth();
+                m_scene->GetInputSystem()->
+                GetInputAreasByDepth();
+
+        auto const this_depth =
+                m_cmlist_xf_data->GetComponent(
+                    m_entity_id).world_xf[3].z;
 
         for(auto const &depth_ipa : list_input_areas_by_depth)
         {
-            if(depth > depth_ipa.first)
+            if(this_depth > depth_ipa.first)
             {
-                depth_ipa.second->cancelInput(list_points);
+                for(auto const &cancel_pt : list_world_pts)
+                {
+                    // cancel_pt is in world coordinates
+                    bool const inside =
+                            Widget::CalcPointInside(
+                                depth_ipa.second,
+                                glm::vec2(
+                                    cancel_pt.x,
+                                    cancel_pt.y));
+
+                    if(inside)
+                    {
+                        depth_ipa.second->cancelInput();
+                        break;
+                    }
+                }
             }
         }
     }

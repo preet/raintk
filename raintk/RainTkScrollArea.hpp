@@ -134,10 +134,11 @@ namespace raintk
         // @diff is the position difference
         void requestContentPositionChange(glm::vec2 const &diff);
 
+        Response handleInput(Point const &point,bool inside) override;
+        Response handleSinglePointInput(Point const &point,bool inside);
+        void cancelInput() override;
+
         bool verifyScrollStart();
-        Response handleInput(Point const &new_point) override;
-        Response handleSinglePointInput(Point const &new_point);
-        void cancelInput(std::vector<Point> const &) override;
 
         bool m_inside_drag{false};
         bool m_inside_scroll{false};

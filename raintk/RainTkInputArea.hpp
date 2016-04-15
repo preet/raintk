@@ -113,22 +113,6 @@ namespace raintk
 
         ~InputArea();
 
-        // Determines whether or not an InputArea::Point
-        // is outside of the Widget
-
-        // NOTE: Expects @point to be in widget-local
-        // coordinates
-        static bool PointOutside(Point const &point,
-                                 Widget* input_area)
-        {
-            return point.x < 0.0f || point.x > input_area->width.Get() ||
-                   point.y < 0.0f || point.y > input_area->height.Get();
-        }
-
-        // Transform @point to be in this widget's local
-        // coordinate space
-        Point TransformPtToLocalCoords(Point const &point) const;
-
         // Properties
 
         // The InputArea only receives input if it is enabled
@@ -137,15 +121,13 @@ namespace raintk
         };
 
     protected:
-        static void cancelInputsBehindDepth(
-                InputSystem* input_system,
-                std::vector<Point> const &list_points,
-                float depth);
+        void cancelInputsBehindWidget(
+                std::vector<Point> const &list_points);
 
         virtual void onEnabledChanged();
 
-        virtual Response handleInput(Point const &) = 0;
-        virtual void cancelInput(std::vector<Point> const &) = 0;
+        virtual Response handleInput(Point const &local_pt,bool inside) = 0;
+        virtual void cancelInput() = 0;
 
         Id m_cid_enabled;
 

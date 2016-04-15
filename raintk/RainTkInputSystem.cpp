@@ -256,9 +256,18 @@ namespace raintk
         {
             for(uint i=0; i < m_list_input_areas_by_depth.size();)
             {
-                auto const response =
-                        m_list_input_areas_by_depth[i].second->handleInput(
-                            list_points[0]);
+                auto input_area = m_list_input_areas_by_depth[i].second;
+                auto const &world_pt = list_points[0];
+
+                glm::vec2 world_xy(world_pt.x,world_pt.y);
+                glm::vec2 local_xy = Widget::CalcLocalCoords(input_area,world_xy);
+                bool inside = Widget::CalcPointInside(input_area,world_xy,local_xy);
+
+                auto local_pt = world_pt;
+                local_pt.x = local_xy.x;
+                local_pt.y = local_xy.y;
+
+                auto const response = input_area->handleInput(local_pt,inside);
 
                 if(response == InputArea::Response::Accept)
                 {

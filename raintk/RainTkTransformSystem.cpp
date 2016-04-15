@@ -132,6 +132,7 @@ namespace raintk
 
         updateWidgetClips(
                     m_scene->GetRootWidget().get(),
+                    m_cmlist_upd_data,
                     m_cmlist_xf_data);
     }
 
@@ -167,6 +168,174 @@ namespace raintk
 
     namespace
     {
+        enum class GeometryResult : u8
+        {
+            XSEC_FALSE = 0,
+            XSEC_TRUE,
+            XSEC_COINCIDENT,
+            XSEC_PARALLEL,
+            XSEC_CONTAINED
+        };
+
+        // CalcLinesIntersect
+        // * checks whether two 2d lines intersect and calculates
+        //   the point of intersection (i_x1,i_y1)
+        // * GeometryResult indicates whether the two lines intersect,
+        //   are coincident, or parallel (if they don't intersect,
+        //   i_x1 and i_y1 are invalid)
+        GeometryResult CalcLineLineIntersection(glm::vec2 const &a1,
+                                                glm::vec2 const &a2,
+                                                glm::vec2 const &b1,
+                                                glm::vec2 const &b2,
+                                                glm::vec2 &xsec)
+        {
+            double ua_numr = (b2.x-b1.x)*(a1.y-b1.y)-(b2.y-b1.y)*(a1.x-b1.x);
+            double ub_numr = (a2.x-a1.x)*(a1.y-b1.y)-(a2.y-a1.y)*(a1.x-b1.x);
+            double denr = (b2.y-b1.y)*(a2.x-a1.x)-(b2.x-b1.x)*(a2.y-a1.y);
+
+            if(denr == 0.0)
+            {
+                // lines are coincident
+                if(ua_numr == 0.0 && ub_numr == 0.0)
+                {   return GeometryResult::XSEC_COINCIDENT;   }
+
+                // lines are parallel
+                else
+                {   return GeometryResult::XSEC_PARALLEL;   }
+            }
+
+            double ua = ua_numr/denr;
+            double ub = ub_numr/denr;
+
+            if(ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
+            {
+                xsec.x = a1.x+ua*(a2.x-a1.x);
+                xsec.y = a1.y+ua*(a2.y-a1.y);
+                return GeometryResult::XSEC_TRUE;
+            }
+
+            return GeometryResult::XSEC_FALSE;
+        }
+
+        // * calculates whether or not test is to the left
+        //   of the infinite line defined by p1 and p0
+        // * returns > 0 if its to the left,
+        //   returns = 0 if its on the line,
+        //   returns < 0 if its to the right
+        float CalcIsLeft(glm::vec2 p0, glm::vec2 p1, glm::vec2 test)
+        {
+            // 2d cross product
+            return (p1.x - p0.x)*(test.y - p0.y) -
+                    (test.x - p0.x)*(p1.y - p0.y);
+        }
+
+        // subj is clipped against clip
+        // expect both to be CCW order
+        std::vector<glm::vec2> g_poly_temp;
+
+        // * Calculate the result of clipping @poly_subj against @poly_clip
+        // * Expects CCW polygons
+        // * No special consideration given to numerical robustness
+        void CalcPolyClipSutherlandHodgman(
+                std::array<glm::vec2,4> const &poly_subj,
+                std::vector<glm::vec2> const &poly_clip,
+                std::vector<glm::vec2>& poly_xsec)
+        {
+            // ref: https://www.cs.helsinki.fi/group/goa/viewing/leikkaus/intro2.html
+
+            uint const poly_clip_sz = poly_clip.size();
+
+            std::vector<glm::vec2> &poly_temp = g_poly_temp;
+            poly_temp.clear();
+
+            for(auto const &vx : poly_subj)
+            {
+                poly_temp.push_back(vx);
+            }
+
+            // For each clipping edge
+            for(uint i=0; i < poly_clip_sz; i++)
+            {
+                auto const &clipping_edge_s = poly_clip[i];
+                auto const &clipping_edge_e = poly_clip[(i+1)%poly_clip_sz];
+
+                // For each subject edge
+                // Clip poly_temp against the current edge of poly_clip,
+                // forming a new polygon. Store the new polygon in poly_xsec
+                poly_xsec.clear();
+                uint const poly_temp_size = poly_temp.size();
+                for(uint j=0; j < poly_temp_size; j++)
+                {
+                    auto const &subj_edge_s = poly_temp[j];
+                    auto const &subj_edge_e = poly_temp[(j+1)%poly_temp_size];
+
+                    // NOTE:
+                    // CalcIsLeft assumes y increases +ve upwards, but our coord
+                    // system has y increasing +ve downwards. This means we need
+                    // to check if points are to the *right* of an edge to see
+                    // if they are inside the polygon
+
+                    if(CalcIsLeft(clipping_edge_s,clipping_edge_e,subj_edge_s) <= 0.0f)
+                    {
+                        if(CalcIsLeft(clipping_edge_s,clipping_edge_e,subj_edge_e) <= 0.0f)
+                        {
+                            // Case: Subject edge inside clip poly
+                            poly_xsec.push_back(subj_edge_e);
+                        }
+                        else
+                        {
+                            // Case: Subject edge leaving clip poly
+                            // TODO numerical robustness
+                            glm::vec2 xsec = subj_edge_s;
+                            CalcLineLineIntersection(
+                                        clipping_edge_s,
+                                        clipping_edge_e,
+                                        subj_edge_s,
+                                        subj_edge_e,
+                                        xsec);
+
+                            poly_xsec.push_back(xsec);
+                        }
+                    }
+                    else
+                    {
+                        if(CalcIsLeft(clipping_edge_s,clipping_edge_e,subj_edge_e) <= 0.0f)
+                        {
+                            // Case: Subject edge entering clip poly
+                            glm::vec2 xsec = subj_edge_s;
+                            CalcLineLineIntersection(
+                                        clipping_edge_s,
+                                        clipping_edge_e,
+                                        subj_edge_s,
+                                        subj_edge_e,
+                                        xsec);
+
+                            poly_xsec.push_back(xsec);
+                            poly_xsec.push_back(subj_edge_e);
+                        }
+                        else
+                        {
+                            // Case: Subject edge outside clip poly
+                            // (save nothing)
+                        }
+                    }
+                }
+
+                // Save the new poly
+                poly_temp = poly_xsec;
+            }
+
+            if(poly_xsec.size() < 3)
+            {
+                // The result is degenerate/incorrect
+                poly_xsec.clear();
+            }
+
+        }
+
+
+        ClipperLib::Clipper g_clipper;
+
         // * Calculate the polygon intersection between @poly_a
         //   and @poly_b (expect points in CCW order)
         void CalcPolyIntersection(std::array<glm::vec2,4> const &poly_a,
@@ -179,6 +348,7 @@ namespace raintk
             }
 
             ClipperLib::Path clipper_poly_a;
+            clipper_poly_a.reserve(poly_a.size());
             for(auto const &vx : poly_a)
             {
                 clipper_poly_a.emplace_back(
@@ -187,6 +357,7 @@ namespace raintk
             }
 
             ClipperLib::Path clipper_poly_b;
+            clipper_poly_b.reserve(poly_b.size());
             for(auto const &vx : poly_b)
             {
                 clipper_poly_b.emplace_back(
@@ -194,12 +365,12 @@ namespace raintk
                             static_cast<ClipperLib::cInt>(vx.y*1000.0f));
             }
 
-            ClipperLib::Clipper clipper;
             ClipperLib::Paths result;
 
-            clipper.AddPath(clipper_poly_a,ClipperLib::ptSubject,true);
-            clipper.AddPath(clipper_poly_b,ClipperLib::ptClip,true);
-            if(!clipper.Execute(ClipperLib::ctIntersection,result))
+            g_clipper.Clear();
+            g_clipper.AddPath(clipper_poly_a,ClipperLib::ptSubject,true);
+            g_clipper.AddPath(clipper_poly_b,ClipperLib::ptClip,true);
+            if(!g_clipper.Execute(ClipperLib::ctIntersection,result))
             {
                 // TODO Throw?
                 rtklog.Trace() << "InputSystem: clipper Intersection failed";
@@ -251,15 +422,6 @@ namespace raintk
             xf_data.poly_vx[3] = xf_data.list_vx[3];
         }
 
-        void CopyListVxToPolyVx(TransformData& xf_data)
-        {
-            xf_data.poly_vx.resize(4);
-            xf_data.poly_vx[0] = xf_data.list_vx[0];
-            xf_data.poly_vx[1] = xf_data.list_vx[1];
-            xf_data.poly_vx[2] = xf_data.list_vx[2];
-            xf_data.poly_vx[3] = xf_data.list_vx[3];
-        }
-
         struct UpdXFStackFrame
         {
             Widget* widget;
@@ -276,6 +438,7 @@ namespace raintk
 
     void TransformSystem::updateWidgetClips(
             Widget* root,
+            UpdateDataComponentList* cmlist_upd_data,
             TransformDataComponentList* cmlist_xf_data)
     {
 
@@ -310,14 +473,29 @@ namespace raintk
                 auto const has_clip = widget->clip.Get();
                 auto const ent_id = widget->GetEntityId();
                 auto& xf_data = cmlist_xf_data->GetComponent(ent_id);
+                auto& upd_data = cmlist_upd_data->GetComponent(ent_id);
 
-//                rtklog.Trace() << "#: " << clip_stack.size();
+                if(upd_data.update & UpdateData::UpdateClip)
+                {
+                    // Clip widget against stack top
+                    xf_data.poly_vx.clear();
 
-                // Clip widget against stack top
-                xf_data.poly_vx.clear();
-                CalcPolyIntersection(xf_data.list_vx,
-                                     *(clip_stack.back()),
-                                     xf_data.poly_vx);
+                    CalcPolyIntersection(
+                                xf_data.list_vx,
+                                *(clip_stack.back()),
+                                xf_data.poly_vx);
+
+                    upd_data.update &= ~(UpdateData::UpdateClip);
+
+                    // Mark child clips as updated
+                    for(auto &child : widget->GetChildren())
+                    {
+                        auto& upd_data = cmlist_upd_data->
+                                GetComponent(child->GetEntityId());
+
+                        upd_data.update |= UpdateData::UpdateClip;
+                    }
+                }
 
                 // If this widget should clip its children, add
                 // this widget's polygon to the clip stack
@@ -425,6 +603,9 @@ namespace raintk
                         xf_data.bbox.y0 = std::min(xf_data.bbox.y0, xf_data.list_vx[i].y);
                         xf_data.bbox.y1 = std::max(xf_data.bbox.y1, xf_data.list_vx[i].y);
                     }
+
+                    // Schedule a clip update
+                    update_data.update |= UpdateData::UpdateClip;
 
                     // Mark all child transforms as requiring updates
                     for(auto& child : widget->GetChildren())

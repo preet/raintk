@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     t2_parent->color = glm::u8vec3(65,65,65);
     t2_parent->clip = true;
 
-    auto t2_child = MakeWidget<Rectangle>(t2_parent,"t1_child");
+    auto t2_child = MakeWidget<Rectangle>(t2_parent,"t2_child");
     t2_child->x = mm(20);
     t2_child->y = mm(5);
     t2_child->z = mm(1);

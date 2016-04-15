@@ -45,10 +45,9 @@ namespace raintk
         };
 
     private:
-        Response handleInput(Point const &pt_global) override
+        Response handleInput(Point const &pt_local,bool inside) override
         {
-            auto pt_local = TransformPtToLocalCoords(pt_global);
-            bool outside = PointOutside(pt_local,this);
+            bool outside = !inside;
 
             if(!outside)
             {
@@ -59,7 +58,7 @@ namespace raintk
                         pressed = false;
                         m_list_cancel_history.clear();
                     }
-                    m_list_cancel_history.push_back(pt_global);
+                    m_list_cancel_history.push_back(pt_local);
                 }
                 else
                 {
@@ -73,7 +72,7 @@ namespace raintk
                                     [this]{ this->cancelInputsBehindThisInputArea(); });
                         m_timer->SetRepeating(false);
                         m_timer->Start();
-                        m_list_cancel_history.push_back(pt_global);
+                        m_list_cancel_history.push_back(pt_local);
                     }
                 }
             }
@@ -82,21 +81,15 @@ namespace raintk
             return Response::Ignore;
         }
 
-        void cancelInput(std::vector<Point> const &) override
+        void cancelInput() override
         {}
 
         void cancelInputsBehindThisInputArea()
         {
             rtklog.Trace() << name << ": Canceling inputs behind this InputArea...";
 
-            auto const this_depth =
-                    m_cmlist_xf_data->GetComponent(
-                        m_entity_id).world_xf[3].z;
-
-            InputArea::cancelInputsBehindDepth(
-                        m_scene->GetInputSystem(),
-                        m_list_cancel_history,
-                        this_depth);
+            this->cancelInputsBehindWidget(
+                        m_list_cancel_history);
 
             m_list_cancel_history.clear();
         }
@@ -126,25 +119,14 @@ namespace raintk
         {}
 
     private:
-        Response handleInput(Point const &) override
+        Response handleInput(Point const &,bool) override
         {
             return Response::Ignore;
         }
 
-        void cancelInput(std::vector<Point> const &list_cancel_pts) override
+        void cancelInput() override
         {
-            for(auto const &cancel_pt : list_cancel_pts)
-            {
-                Point local_pt = TransformPtToLocalCoords(cancel_pt);
-                if(!PointOutside(local_pt,this))
-                {
-                    rtklog.Trace() << name+": Input canceled!";
-                    return;
-                }
-            }
-
-            rtklog.Trace() << name << ": cancelInput called but point is outside";
-
+            rtklog.Trace() << name+": Input canceled!";
         }
     };
 

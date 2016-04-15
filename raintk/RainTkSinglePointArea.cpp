@@ -35,12 +35,10 @@ namespace raintk
     SinglePointArea::~SinglePointArea()
     {}
 
-    InputArea::Response SinglePointArea::handleInput(Point const &new_point)
+    InputArea::Response
+    SinglePointArea::handleInput(Point const &new_point,
+                                 bool inside)
     {
-        Point curr_point = TransformPtToLocalCoords(new_point);
-        bool const outside = PointOutside(curr_point,this);
-        bool const inside = !outside;
-
         bool notify_point=false;
         bool notify_pressed=false;
         bool notify_released=false;
@@ -52,7 +50,7 @@ namespace raintk
         if(!m_inside_drag)
         {
             // Transition: Press within area
-            if(curr_point.action == Point::Action::Press && inside)
+            if(new_point.action == Point::Action::Press && inside)
             {
                 m_inside_drag = true;
                 notify_point = true;
@@ -62,7 +60,7 @@ namespace raintk
         }
         else
         {
-            if(curr_point.action == Point::Action::Release)
+            if(new_point.action == Point::Action::Release)
             {
                 if(inside)
                 {
@@ -94,7 +92,7 @@ namespace raintk
 
         if(notify_point)
         {
-            point = curr_point;
+            point = new_point;
         }
         if(notify_pressed)
         {
@@ -112,28 +110,20 @@ namespace raintk
         return response;
     }
 
-    void SinglePointArea::cancelInput(
-            std::vector<Point> const &list_cancel_input)
+    void SinglePointArea::cancelInput()
     {
-        for(auto const &cancel_pt : list_cancel_input)
+        if(m_inside_drag)
         {
-            Point local_pt = TransformPtToLocalCoords(cancel_pt);
-            if(!PointOutside(local_pt,this))
-            {
-                if(m_inside_drag)
-                {
-                    // TODO, should we reassign point so that
-                    // a signal_changed is emitted?
-                    auto &pt = point.Get();
-                    pt.button = Point::Button::None;
-                    pt.action = Point::Action::None;
-                    // point.signal_changed.Emit();
+            // TODO, should we reassign point so that
+            // a signal_changed is emitted?
+            auto &pt = point.Get();
+            pt.button = Point::Button::None;
+            pt.action = Point::Action::None;
+            // point.signal_changed.Emit();
 
-                    signal_released.Emit();
+            signal_released.Emit();
 
-                    m_inside_drag = false;
-                }
-            }
+            m_inside_drag = false;
         }
     }
 }

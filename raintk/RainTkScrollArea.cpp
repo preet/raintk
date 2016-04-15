@@ -493,11 +493,12 @@ namespace raintk
         }
     }
 
-    InputArea::Response ScrollArea::handleInput(Point const &new_point)
+    InputArea::Response ScrollArea::handleInput(
+            Point const &new_point,bool inside)
     {
         bool const prev_inside_drag = m_inside_drag;
 
-        auto response = handleSinglePointInput(new_point);
+        auto response = handleSinglePointInput(new_point,inside);
 
         if(response == Response::Ignore)
         {
@@ -539,9 +540,7 @@ namespace raintk
             }
 
             // Pass through as the scroll hasn't started yet
-            // Cancel history has to save input points
-            // in global coordinates
-            m_list_cancel_history.push_back(new_point);
+            m_list_cancel_history.push_back(m_point);
             return Response::Ignore;
         }
         else
@@ -553,14 +552,8 @@ namespace raintk
                 {
                     // Cancel any InputAreas that may have
                     // been active from pass through
-                    auto const this_depth =
-                            m_cmlist_xf_data->GetComponent(
-                                m_entity_id).world_xf[3].z;
-
-                    InputArea::cancelInputsBehindDepth(
-                                m_scene->GetInputSystem(),
-                                m_list_cancel_history,
-                                this_depth);
+                    this->cancelInputsBehindWidget(
+                                m_list_cancel_history);
 
                     m_list_cancel_history.clear();
 
@@ -570,9 +563,7 @@ namespace raintk
                     onStartScrolling();
                     return Response::Accept;
                 }
-                // Cancel history has to save input points
-                // in global coordinates
-                m_list_cancel_history.push_back(new_point);
+                m_list_cancel_history.push_back(m_point);
             }
             else
             {
@@ -583,6 +574,75 @@ namespace raintk
 
         // Pass-through to InputAreas below this one
         return Response::Ignore;
+    }
+
+    InputArea::Response ScrollArea::handleSinglePointInput(
+            Point const &new_point,bool inside)
+    {
+        bool notify_point=false;
+
+        Response response = Response::Ignore;
+
+        // State: not inside drag (ignoring)
+        if(!m_inside_drag)
+        {
+            // Transition: Press within area
+            if(new_point.action == Point::Action::Press && inside)
+            {
+                m_inside_drag = true;
+                notify_point = true;
+                response = Response::Accept;
+            }
+        }
+        // State: inside drag (pressed/dragging)
+        else
+        {
+            if(new_point.action == Point::Action::Release)
+            {
+                if(inside)
+                {
+                    // Transition: Release within area
+                }
+                // else
+                // {
+                    // Transition: Release outside of area
+                // }
+
+                m_inside_drag = false;
+                notify_point = true;
+            }
+            else
+            {
+                notify_point = true;
+            }
+
+            response = Response::Accept;
+        }
+
+        if(notify_point)
+        {
+            m_point = new_point;
+        }
+
+        return response;
+    }
+
+    void ScrollArea::cancelInput()
+    {
+        if(m_inside_scroll)
+        {
+            m_inside_scroll = false;
+            onStopScrolling();
+            m_flick_anim->Stop();
+            m_flick_anim->Remove();
+        }
+
+        if(m_inside_drag)
+        {
+            m_point.button = Point::Button::None;
+            m_point.action = Point::Action::None;
+            m_inside_drag = false;
+        }
     }
 
     bool ScrollArea::verifyScrollStart()
@@ -634,87 +694,6 @@ namespace raintk
         }
 
         return false;
-    }
-
-    InputArea::Response ScrollArea::handleSinglePointInput(Point const &new_point)
-    {
-        Point curr_point = TransformPtToLocalCoords(new_point);
-        bool const outside = PointOutside(curr_point,this);
-        bool const inside = !outside;
-
-        bool notify_point=false;
-
-        Response response = Response::Ignore;
-
-        // State: not inside drag (ignoring)
-        if(!m_inside_drag)
-        {
-            // Transition: Press within area
-            if(curr_point.action == Point::Action::Press && inside)
-            {
-                m_inside_drag = true;
-                notify_point = true;
-                response = Response::Accept;
-            }
-        }
-        // State: inside drag (pressed/dragging)
-        else
-        {
-            if(curr_point.action == Point::Action::Release)
-            {
-                if(inside)
-                {
-                    // Transition: Release within area
-                }
-                // else
-                // {
-                    // Transition: Release outside of area
-                // }
-
-                m_inside_drag = false;
-                notify_point = true;
-            }
-            else
-            {
-                notify_point = true;
-            }
-
-            response = Response::Accept;
-        }
-
-        if(notify_point)
-        {
-            m_point = curr_point;
-        }
-
-        return response;
-    }
-
-    void ScrollArea::cancelInput(
-            std::vector<Point> const &list_cancel_pts)
-    {
-        for(auto const &cancel_pt : list_cancel_pts)
-        {
-            Point local_pt = TransformPtToLocalCoords(cancel_pt);
-            if(!PointOutside(local_pt,this))
-            {
-                if(m_inside_scroll)
-                {
-                    m_inside_scroll = false;
-                    onStopScrolling();
-                    m_flick_anim->Stop();
-                    m_flick_anim->Remove();
-                }
-
-                if(m_inside_drag)
-                {
-                    m_point.button = Point::Button::None;
-                    m_point.action = Point::Action::None;
-                    m_inside_drag = false;
-                }
-                break;
-            }
-        }
     }
 
     // =========================================================== //

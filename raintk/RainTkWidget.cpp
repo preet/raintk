@@ -18,6 +18,8 @@
 #include <raintk/RainTkScene.hpp>
 #include <raintk/RainTkTransformSystem.hpp>
 
+#include <raintk/thirdparty/pnpoly.hpp>
+
 namespace raintk
 {
     ChildAlreadyExists::ChildAlreadyExists(std::string msg) :
@@ -274,6 +276,94 @@ namespace raintk
         }
     }
 
+    glm::vec2 Widget::CalcLocalCoords(Widget* widget,
+                                      glm::vec2 const &world_point)
+    {
+        auto const &xf_data =
+                widget->m_cmlist_xf_data->GetComponent(
+                    widget->GetEntityId());
+
+        // Transform the point so its in local coord
+        auto const &xf = xf_data.world_xf;
+
+        glm::vec2 local_point(
+                    glm::inverse(xf)*
+                    glm::vec4(world_point.x,world_point.y,0,1));
+
+        return local_point;
+    }
+
+    glm::vec2 Widget::CalcWorldCoords(
+                    Widget* widget,
+                    glm::vec2 const &local_point)
+    {
+        auto const &xf_data =
+                widget->m_cmlist_xf_data->GetComponent(
+                    widget->GetEntityId());
+
+        // Transform the point so its in world coords
+        glm::vec2 world_point(
+                    xf_data.world_xf*
+                    glm::vec4(local_point.x,local_point.y,0,1));
+
+        return world_point;
+    }
+
+    bool Widget::CalcPointInside(Widget* widget,
+                                 glm::vec2 const &world_point)
+    {
+        auto const &xf_data =
+                widget->m_cmlist_xf_data->GetComponent(
+                    widget->GetEntityId());
+
+        // First do an unclipped widget test
+
+        // Transform the point so its in local coord
+        glm::vec2 local_point = CalcLocalCoords(widget,world_point);
+
+        bool const outside_widget =
+                local_point.x < 0.0f || local_point.x > widget->width.Get() ||
+                local_point.y < 0.0f || local_point.y > widget->height.Get();
+
+        if(outside_widget)
+        {
+            return false;
+        }
+
+
+        // Point in poly test, takes clipping into account
+        // poly_vx is in world coordinates
+        auto const &poly_vx = xf_data.poly_vx;
+        return CalcPointInPoly(poly_vx,world_point);
+    }
+
+    bool Widget::CalcPointInside(
+                    Widget* widget,
+                    glm::vec2 const &world_point,
+                    glm::vec2 const &local_point)
+    {
+        auto const &xf_data =
+                widget->m_cmlist_xf_data->GetComponent(
+                    widget->GetEntityId());
+
+        // First do an unclipped widget test
+        bool const outside_widget =
+                local_point.x < 0.0f || local_point.x > widget->width.Get() ||
+                local_point.y < 0.0f || local_point.y > widget->height.Get();
+
+        if(outside_widget)
+        {
+            return false;
+        }
+
+        return true;
+
+        // Point in poly test, takes clipping into account
+        // poly_vx is in world coordinates
+//        auto const &poly_vx = xf_data.poly_vx;
+//        return CalcPointInPoly(poly_vx,world_point);
+    }
+
     void Widget::onWidthChanged()
     {
         // Do nothing for base widget
@@ -340,7 +430,8 @@ namespace raintk
 
     void Widget::onClipChanged()
     {
-        // Do nothing for base widget
+        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
+        upd_data.update |= UpdateData::UpdateClip;
     }
 
     void Widget::onClipIdUpdated()
