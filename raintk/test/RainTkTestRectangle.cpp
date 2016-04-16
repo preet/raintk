@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
     {
         auto& xpr_rect =
                 *(raintk::MakeWidget<raintk::Rectangle>(
-                    c.scene->GetRootWidget(),
-                    "xpr_rect"+ks::ToString(i)));
+                      c.scene.get(),
+                      c.scene->GetRootWidget()));
 
         xpr_rect.width =
                 [&](){
@@ -83,8 +83,8 @@ int main(int argc, char* argv[])
     {
         auto& opq_rect =
                 *(raintk::MakeWidget<raintk::Rectangle>(
-                    c.scene->GetRootWidget(),
-                    "xpr_rect"+ks::ToString(i)));
+                    c.scene.get(),
+                    c.scene->GetRootWidget()));
 
         opq_rect.width =
                 [&](){

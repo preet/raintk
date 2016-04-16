@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
     auto root = c.scene->GetRootWidget();
 
-    auto image = MakeWidget<Image>(root,"image");
+    auto image = MakeWidget<Image>(c.scene.get(),root);
     image->width = [&](){ return 0.67*root->width.Get(); };
     image->height = [&](){ return 0.67*root->width.Get(); };
     image->x = [&](){ return 0.5*(root->width.Get()-image->width.Get()); };

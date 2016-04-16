@@ -27,8 +27,9 @@ int main(int argc, char* argv[])
 
     TestContext c(600,600);
 
+    auto scene = c.scene.get();
+
     auto draw_system = c.scene->GetDrawSystem();
-//    SetupDrawSystem(draw_system);
 
     draw_system->SetClippingEnabled(false);
     draw_system->SetShowClipOutlines(true);
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
     // and the child widgets had no overlap (thus if
     // clipping was enabled, the child would not show up)
 
-    auto t1_parent = MakeWidget<Rectangle>(root,"t1_parent");
+    auto t1_parent = MakeWidget<Rectangle>(scene,root);
     t1_parent->x = mm(10);
     t1_parent->y = mm(10);
     t1_parent->width = mm(50);
@@ -52,7 +53,7 @@ int main(int argc, char* argv[])
     t1_parent->color = glm::u8vec3(65,65,65);
     t1_parent->clip = true;
 
-    auto t1_child = MakeWidget<Rectangle>(t1_parent,"t1_child");
+    auto t1_child = MakeWidget<Rectangle>(scene,t1_parent);
     t1_child->x = mm(60);
     t1_child->y = mm(10);
     t1_child->z = mm(1);
@@ -67,7 +68,7 @@ int main(int argc, char* argv[])
 
     // The child widgets should have a clear border around
     // its overlapping area indicating the clip
-    auto t2_parent = MakeWidget<Rectangle>(root,"t2_parent");
+    auto t2_parent = MakeWidget<Rectangle>(scene,root);
     t2_parent->x = mm(10);
     t2_parent->y = t1_parent->y.Get()+t1_parent->height.Get()+mm(10);
     t2_parent->width = mm(50);
@@ -75,7 +76,7 @@ int main(int argc, char* argv[])
     t2_parent->color = glm::u8vec3(65,65,65);
     t2_parent->clip = true;
 
-    auto t2_child = MakeWidget<Rectangle>(t2_parent,"t2_child");
+    auto t2_child = MakeWidget<Rectangle>(scene,t2_parent);
     t2_child->x = mm(20);
     t2_child->y = mm(5);
     t2_child->z = mm(1);
@@ -85,7 +86,7 @@ int main(int argc, char* argv[])
     t2_child->rotation = deg(35);
     t2_child->clip = true;
 
-    auto t2_gc = MakeWidget<Rectangle>(t2_child,"t2_gc");
+    auto t2_gc = MakeWidget<Rectangle>(scene,t2_child);
     t2_gc->y = mm(10);
     t2_gc->z = mm(2);
     t2_gc->width = mm(30);

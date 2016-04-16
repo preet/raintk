@@ -134,8 +134,8 @@ int main(int argc, char* argv[])
     {
         auto rect =
                 MakeWidget<Rectangle>(
-                    c.scene->GetRootWidget(),
-                    "r"+ks::ToString(i));
+                    c.scene.get(),
+                    c.scene->GetRootWidget());
 
         rect->y = y;
         rect->width = mm(5);

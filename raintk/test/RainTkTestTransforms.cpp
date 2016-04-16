@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     (void)argv;
 
     TestContext c;
-
+    auto scene = c.scene.get();
     auto parent = c.scene->GetRootWidget();
 
     // Transforms should accumulate up from
@@ -38,33 +38,21 @@ int main(int argc, char* argv[])
     // The blue rectangle should be drawn above
     // the red one
 
-    auto upper_plane =
-            MakeWidget<Widget>(
-                parent,"upper_plane");
-
+    auto upper_plane =MakeWidget<Widget>(scene,parent);
     upper_plane->z = mm(5);
 
 
-    auto lower_plane =
-            MakeWidget<Widget>(
-                parent,"lower_plane");
-
+    auto lower_plane =MakeWidget<Widget>(scene,parent);
     lower_plane->z = mm(1);
 
 
-    auto red =
-            MakeWidget<Rectangle>(
-                lower_plane,"red");
-
+    auto red = MakeWidget<Rectangle>(scene,lower_plane);
     red->x = (parent->width.Get() - red->width.Get())*0.5;
     red->height = parent->height.Get();
     red->color = glm::vec3{255,0,0};
 
 
-    auto blue =
-            MakeWidget<Rectangle>(
-                upper_plane,"blue");
-
+    auto blue = MakeWidget<Rectangle>(scene,upper_plane);
     blue->y = (parent->height.Get() - blue->height.Get())*0.5;
     blue->width = parent->width.Get();
     blue->color = glm::vec3{0,0,255};

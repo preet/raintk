@@ -51,17 +51,18 @@ namespace raintk
     {
     public:
         TestDelegate(ks::Object::Key const &key,
+                     Scene* scene,
                      shared_ptr<Widget> parent) :
-            ListDelegate(key,parent),
+            ListDelegate(key,scene,parent),
             m_index(0)
         {}
 
         void Init(ks::Object::Key const &,
                   shared_ptr<TestDelegate> const &this_delegate)
         {
-            m_rect = MakeWidget<Rectangle>(this_delegate,"");
+            m_rect = MakeWidget<Rectangle>(m_scene,this_delegate);
 
-            m_text = MakeWidget<Text>(m_rect,"");
+            m_text = MakeWidget<Text>(m_scene,m_rect);
             m_text->font = "FiraSansMinimal.ttf";
             m_text->color = glm::u8vec3(255,255,255);
             m_text->z = m_rect->z.Get() + mm(1.0f);
@@ -209,19 +210,19 @@ namespace raintk
 
         // * Delegate bounds
         Property<float> m_delegate_bounds_top{
-            name+".delegate_bounds_top",0.0f
+            0.0f
         };
 
         Property<float> m_delegate_bounds_bottom{
-            name+".delegate_bounds_bottom",0.0f
+            0.0f
         };
 
         Property<float> m_delegate_bounds_left{
-            name+".delegate_bounds_left",0.0f
+            0.0f
         };
 
         Property<float> m_delegate_bounds_right{
-            name+".delegate_bounds_right",0.0f
+            0.0f
         };
 
         // These properties point to the four above properties
@@ -258,16 +259,16 @@ namespace raintk
     public:
         // Properties
         Property<float> delegate_extents{
-            name+"delegate_extents",mm(25)
+            mm(25)
         };
 
         Property<float> spacing{
-            name+".spacing",0.0f
+            0.0f
         };
 
         // TODO Should this be a template parameter instead?
         Property<ListViewProperties::Layout> layout{
-            name+".layout",ListViewProperties::Layout::Column
+            ListViewProperties::Layout::Column
         };
 
         // === //
@@ -275,9 +276,9 @@ namespace raintk
         using base_type = raintk::ScrollArea;
 
         ListView(ks::Object::Key const &key,
-                 shared_ptr<Widget> parent,
-                 std::string name) :
-            raintk::ScrollArea(key,parent,std::move(name)),
+                 Scene* scene,
+                 shared_ptr<Widget> parent) :
+            raintk::ScrollArea(key,scene,parent),
             m_upd_reposition(false)
         {}
 
@@ -811,7 +812,7 @@ namespace raintk
 
         shared_ptr<DelegateType> createDelegate(uint model_index)
         {
-            auto delegate = MakeWidget<DelegateType>(m_content_parent);
+            auto delegate = MakeWidget<DelegateType>(m_scene,m_content_parent);
             delegate->SetData(m_list_model->GetData(model_index));
             delegate->SetIndex(model_index);
             delegate->UpdateHierarchy();
@@ -1130,9 +1131,10 @@ namespace raintk
                 // top
                 lgd.push_back(
                             MakeWidget<Rectangle>(
-                                m_content_parent,
-                                name+"guideline_delegates_top"));
+                                m_scene,
+                                m_content_parent));
 
+                lgd.back()->name = ks::ToString(GetId())+"guideline_delegates_top";
                 lgd.back()->width = [this](){ return width.Get(); };
                 lgd.back()->height = mm(0.25f);
                 lgd.back()->y = [this](){ return m_delegate_bounds_top.Get(); };
@@ -1141,9 +1143,10 @@ namespace raintk
                 // bottom
                 lgd.push_back(
                             MakeWidget<Rectangle>(
-                                m_content_parent,
-                                name+"guideline_delegates_bottom"));
+                                m_scene,
+                                m_content_parent));
 
+                lgd.back()->name = ks::ToString(GetId())+"guideline_delegates_bottom";
                 lgd.back()->width = [this](){ return width.Get(); };
                 lgd.back()->height = mm(0.25f);
                 lgd.back()->y = [this](){ return m_delegate_bounds_bottom.Get(); };
@@ -1155,9 +1158,10 @@ namespace raintk
                 // top
                 lgd.push_back(
                             MakeWidget<Rectangle>(
-                                m_content_parent,
-                                name+"guideline_content_top"));
+                                m_scene,
+                                m_content_parent));
 
+                lgd.back()->name = ks::ToString(GetId())+"guideline_content_top";
                 lgd.back()->width = [this](){ return width.Get(); };
                 lgd.back()->height = mm(0.25f);
                 lgd.back()->y = mm(0.0f);
@@ -1167,9 +1171,10 @@ namespace raintk
                 // bottom
                 lgd.push_back(
                             MakeWidget<Rectangle>(
-                                m_content_parent,
-                                name+"guideline_content_bottom"));
+                                m_scene,
+                                m_content_parent));
 
+                lgd.back()->name = ks::ToString(GetId())+"guideline_content_bottom";
                 lgd.back()->width = [this](){ return width.Get(); };
                 lgd.back()->height = mm(0.25f);
                 lgd.back()->y = [this](){ return m_content_parent->height.Get()-mm(0.25f); };
@@ -1197,14 +1202,13 @@ using namespace raintk;
 
 std::vector<shared_ptr<SinglePointArea>>
 CreateButtonRow(shared_ptr<Widget> root,
-                std::string name,
                 float y_position)
 {
     std::vector<shared_ptr<SinglePointArea>> list_sp_areas;
 
-    auto row =
-            MakeWidget<Row>(
-                root,name);
+    auto scene = root->GetScene();
+
+    auto row = MakeWidget<Row>(scene,root);
 
     row->height = mm(10);
     row->spacing = mm(2);
@@ -1217,15 +1221,13 @@ CreateButtonRow(shared_ptr<Widget> root,
     auto create_button =
             [&](std::string button_name)
             {
-                auto button_rect =
-                        MakeWidget<Rectangle>(
-                            row,"button_rect");
+                auto button_rect = MakeWidget<Rectangle>(scene,row);
 
                 button_rect->width = mm(15);
                 button_rect->height = mm(10);
                 button_rect->z = mm(3.0f);
 
-                auto button_text = MakeWidget<Text>(button_rect,"");
+                auto button_text = MakeWidget<Text>(scene,button_rect);
                 button_text->text = button_name;
                 button_text->color = glm::u8vec3(255,255,255);
                 button_text->z = button_rect->z.Get() + mm(1.0f);
@@ -1234,7 +1236,7 @@ CreateButtonRow(shared_ptr<Widget> root,
 
                 auto button_sp_area =
                         MakeWidget<SinglePointArea>(
-                            button_rect,"button_sp_area");
+                            scene,button_rect);
 
                 button_sp_area->width = button_rect->width.Get();
                 button_sp_area->height = button_rect->height.Get();
@@ -1269,6 +1271,7 @@ int main(int argc, char* argv[])
     (void)argv;
 
     TestContext c(600,800);
+    auto scene = c.scene.get();
     auto root = c.scene->GetRootWidget();
 //    c.scene->SetShowDebugText(false);
 
@@ -1282,7 +1285,7 @@ int main(int argc, char* argv[])
 
     // Create add buttons
     auto list_button_sp_areas =
-            CreateButtonRow(root,"buttons",0.0f);
+            CreateButtonRow(root,0.0f);
 
     std::vector<TestItem> list_add_insert{
 //        TestItem{glm::u8vec3{249,155,12}},
@@ -1381,7 +1384,7 @@ int main(int argc, char* argv[])
     // Create list view
     auto list_view_bgbg =
             MakeWidget<Rectangle>(
-                root,"list_view_bgbg");
+                scene,root);
 
     list_view_bgbg->width = mm(60);
     list_view_bgbg->height = mm(150);
@@ -1393,7 +1396,7 @@ int main(int argc, char* argv[])
 
     auto list_view_bg =
             MakeWidget<Rectangle>(
-                root,"list_view_bg");
+                scene,root);
 
     list_view_bg->width = mm(60);
     list_view_bg->height = mm(100);
@@ -1405,8 +1408,8 @@ int main(int argc, char* argv[])
 
     // ListView
     auto list_view =
-            ks::MakeObject<ListView<TestItem,TestDelegate>>(
-                list_view_bg,"list_view");
+            MakeWidget<ListView<TestItem,TestDelegate>>(
+                scene,list_view_bg);
 
     list_view->width = list_view_bg->width.Get();
     list_view->height = list_view_bg->height.Get();
@@ -1416,13 +1419,13 @@ int main(int argc, char* argv[])
 
 
     // Debug Lines
-    auto line_top = MakeWidget<Rectangle>(root,"");
+    auto line_top = MakeWidget<Rectangle>(scene,root);
     line_top->color = glm::u8vec3(255,255,255);
     line_top->height = mm(0.5);
     line_top->width = root->width.Get();
     line_top->y = list_view_bg->y.Get();
 
-    auto line_bottom = MakeWidget<Rectangle>(root,"");
+    auto line_bottom = MakeWidget<Rectangle>(scene,root);
     line_bottom->color = glm::u8vec3(255,255,255);
     line_bottom->height = mm(0.5);
     line_bottom->width = root->width.Get();
@@ -1432,7 +1435,7 @@ int main(int argc, char* argv[])
     // Scrollbar track
     auto scroll_track =
             MakeWidget<Rectangle>(
-                list_view_bg,"scroll_track");
+                scene,list_view_bg);
 
     scroll_track->height =
             [&](){
@@ -1452,7 +1455,7 @@ int main(int argc, char* argv[])
     // Scrollbar grip
     auto scroll_grip =
             MakeWidget<Rectangle>(
-                scroll_track,"scroll_grip");
+                scene,scroll_track);
 
     scroll_grip->height =
             [&](){
@@ -1506,14 +1509,14 @@ int main(int argc, char* argv[])
 
 
     // Content Parent Stats
-    auto ctp_desc = MakeWidget<Text>(root,"");
+    auto ctp_desc = MakeWidget<Text>(scene,root);
     ctp_desc->x = list_view_bgbg->x.Get() + list_view_bgbg->width.Get() + mm(10);
     ctp_desc->y = list_view_bgbg->y.Get() + mm(35);
     ctp_desc->color = glm::u8vec3(255,255,255);
     ctp_desc->text = "Content Parent";
     ctp_desc->font = "FiraSansMinimal.ttf";
 
-    auto ctp_y = MakeWidget<Text>(root,"");
+    auto ctp_y = MakeWidget<Text>(scene,root);
     ctp_y->x = ctp_desc->x.Get();
     ctp_y->y = ctp_desc->y.Get() + mm(10);
     ctp_y->color = glm::u8vec3(255,255,255);
@@ -1523,7 +1526,7 @@ int main(int argc, char* argv[])
     };
     ctp_y->font = "FiraSansMinimal.ttf";
 
-    auto ctp_h = MakeWidget<Text>(root,"");
+    auto ctp_h = MakeWidget<Text>(scene,root);
     ctp_h->x = ctp_desc->x.Get();
     ctp_h->y = ctp_y->y.Get() + mm(10);
     ctp_h->color = glm::u8vec3(255,255,255);

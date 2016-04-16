@@ -48,8 +48,8 @@ namespace raintk
         };
 
         Grid(ks::Object::Key const &key,
-               shared_ptr<Widget> parent,
-               std::string name);
+             Scene* scene,
+             shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<Grid> const &);
@@ -61,23 +61,23 @@ namespace raintk
 
         // Properties
         Property<LayoutDirection> layout_direction{
-            name+"layout",LayoutDirection::LeftToRight
+            LayoutDirection::LeftToRight
         };
 
         Property<uint> rows{
-            name+"rows",3
+            3
         };
 
         Property<uint> cols{
-            name+"cols",3
+            3
         };
 
         Property<float> row_spacing{
-            name+".row_spacing",0.0f
+            0.0f
         };
 
         Property<float> col_spacing{
-            name+".col_spacing",0.0f
+            0.0f
         };
 
     protected:

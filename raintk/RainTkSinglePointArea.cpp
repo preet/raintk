@@ -23,9 +23,9 @@
 namespace raintk
 {
     SinglePointArea::SinglePointArea(ks::Object::Key const &key,
-                                     shared_ptr<Widget> parent,
-                                     std::string name) :
-        InputArea(key,parent,name)
+                                     Scene* scene,
+                                     shared_ptr<Widget> parent) :
+        InputArea(key,scene,parent)
     {}
 
     void SinglePointArea::Init(ks::Object::Key const &,

@@ -105,8 +105,8 @@ namespace raintk
         };
 
         InputArea(ks::Object::Key const &key,
-                  shared_ptr<Widget> parent,
-                  std::string name);
+                  Scene* scene,
+                  shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<InputArea> const &);
@@ -117,7 +117,7 @@ namespace raintk
 
         // The InputArea only receives input if it is enabled
         Property<bool> enabled{
-            name+".enabled",true
+            true
         };
 
     protected:

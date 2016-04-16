@@ -33,16 +33,15 @@ namespace raintk
         // and hiding the one we want to call
         using ks::DynamicProperty<T>::operator=;
 
-        DynamicPropertyPushNotify(std::string name,T value) :
-            ks::DynamicProperty<T>(std::move(name),std::move(value))
+        DynamicPropertyPushNotify(T value) :
+            ks::DynamicProperty<T>(std::move(value))
         {
             this->setupNotifier();
         }
 
         DynamicPropertyPushNotify(
-                std::string name,
                 typename ks::DynamicProperty<T>::BindingFn binding) :
-            ks::DynamicProperty<T>(std::move(name),std::move(binding))
+            ks::DynamicProperty<T>(std::move(binding))
         {
             this->setupNotifier();
         }
@@ -67,16 +66,15 @@ namespace raintk
     public:
         using ks::DynamicProperty<T>::operator=;
 
-        DynamicPropertyPullNotify(std::string name,T value) :
-            ks::DynamicProperty<T>(std::move(name),std::move(value))
+        DynamicPropertyPullNotify(T value) :
+            ks::DynamicProperty<T>(std::move(value))
         {
             this->setupNotifier();
         }
 
         DynamicPropertyPullNotify(
-                std::string name,
                 typename ks::DynamicProperty<T>::BindingFn binding) :
-            ks::DynamicProperty<T>(std::move(name),std::move(binding))
+            ks::DynamicProperty<T>(std::move(binding))
         {
             this->setupNotifier();
         }

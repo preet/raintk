@@ -26,16 +26,15 @@ int main(int argc, char* argv[])
     (void)argv;
 
     TestContext c;
-
-    auto root =
-            c.scene->GetRootWidget();
+    auto scene = c.scene.get();
+    auto root = c.scene->GetRootWidget();
 
     // =========================================================== //
 
     auto r0 =
             MakeWidget<Rectangle>(
-                c.scene->GetRootWidget(),
-                "r0");
+                scene,
+                c.scene->GetRootWidget());
 
     float r0_angle_rads = -0.25;
 
@@ -49,7 +48,8 @@ int main(int argc, char* argv[])
 
     auto sp_area0 =
             MakeWidget<SinglePointArea>(
-                r0,"sp_area0");
+                scene,
+                r0);
 
     sp_area0->width = mm(60);
     sp_area0->height = mm(60);
@@ -100,8 +100,8 @@ int main(int argc, char* argv[])
 
     auto r1 =
             MakeWidget<Rectangle>(
-                c.scene->GetRootWidget(),
-                "r1");
+                scene,
+                c.scene->GetRootWidget());
 
     float r1_angle_rads = -0.35;
 
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
 
     auto sp_area1 =
             MakeWidget<SinglePointArea>(
-                r1,"sp_area1");
+                scene,r1);
 
     sp_area1->width = mm(60);
     sp_area1->height = mm(60);

@@ -29,8 +29,8 @@ namespace raintk
         using base_type = raintk::Widget;
 
         Column(ks::Object::Key const &key,
-               shared_ptr<Widget> parent,
-               std::string name);
+               Scene* scene,
+               shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<Column> const &);
@@ -42,7 +42,7 @@ namespace raintk
 
         // Properties
         Property<float> spacing{
-            name+".spacing",0.0f
+            0.0f
         };
 
     protected:

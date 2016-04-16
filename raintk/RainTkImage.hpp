@@ -60,8 +60,8 @@ namespace raintk
         };
 
         Image(ks::Object::Key const &key,
-              shared_ptr<Widget> parent,
-              std::string name);
+              Scene* scene,
+              shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<Image> const &);
@@ -71,15 +71,15 @@ namespace raintk
 
         // Properties
         Property<Source> source {
-            name+".source",Source{}
+            Source{}
         };
 
         Property<FillMode> fill_mode {
-            name+".fill_mode",FillMode::Stretch
+            FillMode::Stretch
         };
 
         Property<bool> smooth {
-            name+".smooth",true
+            true
         };
 
 

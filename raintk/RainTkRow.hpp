@@ -35,8 +35,8 @@ namespace raintk
         };
 
         Row(ks::Object::Key const &key,
-            shared_ptr<Widget> parent,
-            std::string name);
+            Scene* scene,
+            shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<Row> const &);
@@ -48,11 +48,11 @@ namespace raintk
 
         // Properties
         Property<float> spacing{
-            name+".spacing",0.0f
+            0.0f
         };
 
         Property<LayoutDirection> layout_direction{
-            name+".layout_direction",LayoutDirection::LeftToRight
+            LayoutDirection::LeftToRight
         };
 
     protected:

@@ -23,24 +23,26 @@ shared_ptr<Widget> CreateStripes(shared_ptr<Widget> parent,
                                  float width_mm,
                                  glm::vec3 color)
 {
+    auto scene = parent->GetScene();
+
     float height_mm = mm(7);
 
-    auto p = MakeWidget<Widget>(parent,"p");
+    auto p = MakeWidget<Widget>(scene,parent);
     p->height = 5*height_mm;
     p->width = width_mm;
 
-    auto r0 = MakeWidget<Rectangle>(p,"r0");
+    auto r0 = MakeWidget<Rectangle>(scene,p);
     r0->height = height_mm;
     r0->width = width_mm;
     r0->color = color;
 
-    auto r1 = MakeWidget<Rectangle>(p,"r1");
+    auto r1 = MakeWidget<Rectangle>(scene,p);
     r1->height = height_mm;
     r1->width = width_mm;
     r1->color = color;
     r1->y = 2*height_mm;
 
-    auto r2 = MakeWidget<Rectangle>(p,"r2");
+    auto r2 = MakeWidget<Rectangle>(scene,p);
     r2->height = height_mm;
     r2->width = width_mm;
     r2->color = color;
@@ -56,6 +58,7 @@ int main(int argc, char* argv[])
 
     TestContext c;
 
+    auto scene = c.scene.get();
 
     auto root_widget_ptr =
             c.scene->GetRootWidget().get();
@@ -64,8 +67,8 @@ int main(int argc, char* argv[])
     // Create the left view
     auto left_view =
             MakeWidget<Widget>(
-                c.scene->GetRootWidget(),
-                "left_view");
+                scene,
+                c.scene->GetRootWidget());
 
     left_view->width =
             [root_widget_ptr]() {
@@ -85,8 +88,8 @@ int main(int argc, char* argv[])
     // Create two right views
     auto right_view0 =
             MakeWidget<Rectangle>(
-                c.scene->GetRootWidget(),
-                "right_view0");
+                scene,
+                c.scene->GetRootWidget());
 
     right_view0->x =
             [root_widget_ptr]() {
@@ -112,8 +115,8 @@ int main(int argc, char* argv[])
 
     auto right_view1 =
             MakeWidget<Rectangle>(
-                c.scene->GetRootWidget(),
-                "right_view1");
+                scene,
+                c.scene->GetRootWidget());
 
     right_view1->x =
             [root_widget_ptr]() {

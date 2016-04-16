@@ -27,6 +27,7 @@ void CreateButtonColumn(shared_ptr<Widget> p)
     float button_height = mm(30.0f);
     float button_width = p->width.Get()-2*spacing;
 
+    auto scene = p->GetScene();
     auto &column = p;
     column->height = (button_height+spacing)*10;
 
@@ -34,24 +35,24 @@ void CreateButtonColumn(shared_ptr<Widget> p)
 
     for(uint i=0; i < 10; i++)
     {
-        auto button = MakeWidget<Widget>(column,"");
+        auto button = MakeWidget<Widget>(scene,column);
         button->width = button_width;
         button->height = button_height;
         button->x = spacing;
         button->y = button_y;
 
-        auto spa = MakeWidget<SinglePointArea>(button,"");
+        auto spa = MakeWidget<SinglePointArea>(scene,button);
         spa->width = button->width.Get();
         spa->height = button->height.Get();
         spa->z = mm(-1.0f);
 
-        auto bg = MakeWidget<Rectangle>(button,"");
+        auto bg = MakeWidget<Rectangle>(scene,button);
         bg->width = button->width.Get();
         bg->height = button->height.Get();
         bg->color = glm::u8vec3(0,0,0);
         bg->z = mm(3.0f);
 
-        auto text = MakeWidget<Text>(bg,"");
+        auto text = MakeWidget<Text>(scene,bg);
         text->color = glm::u8vec3(255,255,255);
         text->text = "Click Me";
         text->z = mm(0.5f);
@@ -68,6 +69,8 @@ void CreateButtonColumn(shared_ptr<Widget> p)
 
 void CreateVerticalScrollAreas(shared_ptr<Widget> p)
 {
+    auto scene = p->GetScene();
+
     float vsa_width = p->width.Get()/3.0f;
     float vsa_height = p->height.Get();
     float vsa_margin = mm(15.0f);
@@ -76,19 +79,19 @@ void CreateVerticalScrollAreas(shared_ptr<Widget> p)
     for(uint i=0; i < 3; i++)
     {
         // list view
-        auto base = MakeWidget<Widget>(p,"");
+        auto base = MakeWidget<Widget>(scene,p);
         base->width = vsa_width;
         base->height = vsa_height;
         base->x = vsa_x;
 
-        auto bg = MakeWidget<Rectangle>(base,"");
+        auto bg = MakeWidget<Rectangle>(scene,base);
         bg->width = vsa_width - 2*vsa_margin;
         bg->height = vsa_height - 2*vsa_margin;
         bg->x = vsa_margin;
         bg->y = vsa_margin;
         bg->z = mm(1.0f);
 
-        auto vsa = MakeWidget<ScrollArea>(base,"");
+        auto vsa = MakeWidget<ScrollArea>(scene,base);
         vsa->width = bg->width.Get();
         vsa->height = bg->height.Get();
         vsa->x = vsa_margin;
@@ -112,12 +115,13 @@ int main(int argc, char* argv[])
     (void)argv;
 
     TestContext c(600,600);
+    auto scene = c.scene.get();
     auto root = c.scene->GetRootWidget();
 
     // =========================================================== //
 
     // horizontal scroll area
-    auto hsa = MakeWidget<ScrollArea>(root,"hsa");
+    auto hsa = MakeWidget<ScrollArea>(scene,root);
     hsa->width = root->width.Get();
     hsa->height = root->height.Get();
     hsa->clip = true;

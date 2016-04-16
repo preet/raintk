@@ -27,8 +27,8 @@ namespace raintk
         using base_type = DrawableWidget;
 
         Rectangle(ks::Object::Key const &key,
-                  shared_ptr<Widget> parent,
-                  std::string name);
+                  Scene* scene,
+                  shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<Rectangle> const &);
@@ -38,7 +38,7 @@ namespace raintk
 
         // Properties
         Property<glm::u8vec3> color {
-            name+".color",glm::u8vec3{255,51,51}
+            glm::u8vec3{255,51,51}
         };
 
     protected:

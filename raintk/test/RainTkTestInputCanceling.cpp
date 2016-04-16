@@ -28,9 +28,9 @@ namespace raintk
         using base_type = raintk::InputArea;
 
         InputDelayedCancel(ks::Object::Key const &key,
-                           shared_ptr<Widget> parent,
-                           std::string name) :
-            InputArea(key,parent,name)
+                           Scene* scene,
+                           shared_ptr<Widget> parent) :
+            InputArea(key,scene,parent)
         {}
 
         void Init(ks::Object::Key const &,
@@ -41,7 +41,7 @@ namespace raintk
         {}
 
         Property<bool> pressed{
-            name+".pressed",false
+            false
         };
 
     private:
@@ -106,9 +106,9 @@ namespace raintk
         using base_type = raintk::InputArea;
 
         CancelReceiver(ks::Object::Key const &key,
-                       shared_ptr<Widget> parent,
-                       std::string name) :
-            InputArea(key,parent,name)
+                       Scene* scene,
+                       shared_ptr<Widget> parent) :
+            InputArea(key,scene,parent)
         {}
 
         void Init(ks::Object::Key const &,
@@ -141,9 +141,10 @@ int main(int argc, char* argv[])
     (void)argv;
 
     TestContext c;
+    auto scene = c.scene.get();
     auto root = c.scene->GetRootWidget();
 
-    auto idc_bg = MakeWidget<Rectangle>(root,"red");
+    auto idc_bg = MakeWidget<Rectangle>(scene,root);
     idc_bg->height = mm(50);
     idc_bg->width = mm(50);
     idc_bg->z = mm(10);
@@ -152,7 +153,8 @@ int main(int argc, char* argv[])
     // 200ms after clicking on idc, it will tell the
     // InputSystem to cancel all inputs behind it
     // (ie with a smaller z value)
-    auto idc = MakeWidget<InputDelayedCancel>(root,"red");
+    auto idc = MakeWidget<InputDelayedCancel>(scene,root);
+    idc->name = "red";
     idc->height = mm(50);
     idc->width  = mm(50);
     idc->z = mm(10);
@@ -168,7 +170,8 @@ int main(int argc, char* argv[])
             float y,
             float z) {
                     // background
-                    auto bg = MakeWidget<Rectangle>(parent,name);
+                    auto bg = MakeWidget<Rectangle>(scene,parent);
+                    bg->name = name;
                     bg->height = height;
                     bg->width = width;
                     bg->x = x;
@@ -177,7 +180,8 @@ int main(int argc, char* argv[])
                     bg->color = color;
 
                     // input area
-                    auto ia = MakeWidget<CancelReceiver>(parent,name);
+                    auto ia = MakeWidget<CancelReceiver>(scene,parent);
+                    ia->name = name;
                     ia->height = height;
                     ia->width = width;
                     ia->x = x;

@@ -22,9 +22,9 @@
 namespace raintk
 {
     InputArea::InputArea(ks::Object::Key const &key,
-                         shared_ptr<Widget> parent,
-                         std::string name) :
-        Widget(key,parent,name),
+                         Scene* scene,
+                         shared_ptr<Widget> parent) :
+        Widget(key,scene,parent),
         m_cmlist_input_data(
             static_cast<InputDataComponentList*>(
                 m_scene->template GetComponentList<InputData>()))

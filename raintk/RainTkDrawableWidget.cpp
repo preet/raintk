@@ -23,9 +23,9 @@ namespace raintk
     std::map<Id,std::function<void()>> DrawableWidget::s_lkup_renderable_init;
 
     DrawableWidget::DrawableWidget(ks::Object::Key const &key,
-                                 shared_ptr<Widget> parent,
-                                 std::string name) :
-        Widget(key,parent,name)
+                                   Scene* scene,
+                                   shared_ptr<Widget> parent) :
+        Widget(key,scene,parent)
     {
 
     }

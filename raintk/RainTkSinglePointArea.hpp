@@ -30,8 +30,8 @@ namespace raintk
         using base_type = raintk::InputArea;
 
         SinglePointArea(ks::Object::Key const &key,
-                        shared_ptr<Widget> parent,
-                        std::string name);
+                        Scene* scene,
+                        shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<SinglePointArea> const &);
@@ -40,7 +40,6 @@ namespace raintk
 
         // Properties
         Property<InputArea::Point> point{
-            name+".point",
             Point{
                 Point::Type::Mouse,
                 Point::Button::None,

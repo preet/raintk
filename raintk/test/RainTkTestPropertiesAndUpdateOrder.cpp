@@ -29,11 +29,11 @@ public:
     using base_type = raintk::Animation;
 
     Property<float> from {
-        "anim.from",0.0f
+        0.0f
     };
 
     Property<float> to {
-        "anim.to",0.0f
+        0.0f
     };
 
     Property<float>* target{nullptr};
@@ -107,11 +107,13 @@ int main(int argc, char* argv[])
 
     TestContext c;
 
+    auto scene = c.scene.get();
+
     auto root = c.scene->GetRootWidget();
 
-    auto button_add_bg = MakeWidget<Rectangle>(root,"");
+    auto button_add_bg = MakeWidget<Rectangle>(scene,root);
 
-    auto button_add_text = MakeWidget<Text>(button_add_bg,"");
+    auto button_add_text = MakeWidget<Text>(scene,button_add_bg);
     button_add_text->x = [&](){ return (button_add_bg->width.Get()-button_add_text->width.Get())*0.5f; };
     button_add_text->y = [&](){ return (button_add_bg->height.Get()-button_add_text->height.Get())*0.5f; };
     button_add_text->z = mm(1.0f);
@@ -122,7 +124,7 @@ int main(int argc, char* argv[])
     button_add_bg->width = [&](){ return button_add_text->width.Get()+mm(5); };
     button_add_bg->height = [&](){ return button_add_text->height.Get()+mm(5); };
 
-    auto button_add_sp = MakeWidget<SinglePointArea>(button_add_bg,"");
+    auto button_add_sp = MakeWidget<SinglePointArea>(scene,button_add_bg);
     button_add_sp->width = [&](){ return button_add_bg->width.Get(); };
     button_add_sp->height = [&](){ return button_add_bg->height.Get(); };
     button_add_sp->z = mm(2.0f);
@@ -138,7 +140,7 @@ int main(int argc, char* argv[])
                     // At this point the text width and height
                     // are incorrect and an update is pending
 
-                    r0 = MakeWidget<Rectangle>(root,"r0");
+                    r0 = MakeWidget<Rectangle>(scene,root);
                     r0->x = 0;
                     r0->y = mm(20);
                     r0->width = [&](){ return button_add_text->width.Get()+mm(5); };
@@ -153,7 +155,7 @@ int main(int argc, char* argv[])
                     animation->target = &(r0->width);
                     animation->from = 0.0f;
                     animation->to = [&](){ return button_add_text->width.Get() + mm(5); };
-                    animation->duration_ms = 300.0f;
+                    animation->duration_ms = 1000.0f;
                     animation->Start();
 
                     // Since the start of the animation is delayed by one frame,

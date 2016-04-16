@@ -88,9 +88,9 @@ namespace raintk
     // ============================================================= //
 
     Image::Image(ks::Object::Key const &key,
-                 shared_ptr<Widget> parent,
-                 std::string name) :
-        DrawableWidget(key,parent,name),
+                 Scene* scene,
+                 shared_ptr<Widget> parent) :
+        DrawableWidget(key,scene,parent),
         m_cmlist_draw_data(
             m_scene->GetDrawSystem()->
             GetDrawDataComponentList()),

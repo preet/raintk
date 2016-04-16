@@ -66,16 +66,12 @@ namespace raintk
         // Note: These fields are placed at the top since they
         //       should be initialized before the properties
         //       so that property names are correct
-        std::string const name;
+        std::string name;
 
 
         Widget(ks::Object::Key const &key,
-               RootWidgetKey const &rwkey,
-               shared_ptr<Scene> scene);
-
-        Widget(ks::Object::Key const &key,
-               shared_ptr<Widget> parent,
-               std::string name);
+               Scene* scene,
+               shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<Widget> const &);
@@ -128,40 +124,40 @@ namespace raintk
 
         // Properties
         Property<float> width{
-            name+".width",0.0f
+            0.0f
         };
 
         Property<float> height{
-            name+".height",0.0f
+            0.0f
         };
 
         Property<float> x{
-            name+".x",0.0f
+            0.0f
         };
 
         Property<float> y{
-            name+".y",0.0f
+            0.0f
         };
 
         Property<float> z{
-            name+".z",0.0f
+            0.0f
         };
 
         // The rotation angle in rads
         Property<float> rotation{
-            name+".rotation",0.0f
+            0.0f
         };
 
         Property<glm::vec2> scale{
-            name+".scale",glm::vec2{1.0f}
+            glm::vec2{1.0f}
         };
 
         Property<glm::vec2> origin{
-            name+".origin",glm::vec2{0.0f}
+            glm::vec2{0.0f}
         };
 
         Property<bool> clip{
-            name+".clip",false
+            false
         };
 
         // signal that is emitted from within the
@@ -215,7 +211,7 @@ namespace raintk
                       "raintk::MakeWidget: Type must be Widget or"
                       "derive from Widget");
 
-        return ks::MakeObject<T>(args...);
+        return ks::MakeObject<T>(std::forward<Args>(args)...);
     }
 
     // ============================================================= //

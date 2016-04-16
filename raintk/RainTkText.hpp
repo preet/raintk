@@ -88,8 +88,8 @@ namespace raintk
         using base_type = DrawableWidget;
 
         Text(ks::Object::Key const &key,
-             shared_ptr<Widget> parent,
-             std::string name);
+             Scene* scene,
+             shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<Text> const &);
@@ -100,28 +100,27 @@ namespace raintk
 
         // Properties
         Property<glm::u8vec3> color {
-            name+".color",glm::u8vec3{51,51,51}
+            glm::u8vec3{51,51,51}
         };
 
         Property<std::string> text {
-            name+".text",std::string("")
+            std::string("")
         };
 
         Property<std::string> font {
-            name+".font",std::string("")
+            std::string("")
         };
 
         Property<float> size {
-            name+".size",mm(5.0f)
+            mm(5.0f)
         };
 
         Property<float> line_width {
-            name+".line_width",
             static_cast<float>(k_max_line_width)
         };
 
         Property<Alignment> alignment {
-            name+".alignment",Alignment::Auto
+            Alignment::Auto
         };
 
     private:

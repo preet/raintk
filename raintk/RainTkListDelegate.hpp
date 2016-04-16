@@ -49,8 +49,9 @@ namespace raintk
         using base_type = Widget;
 
         ListDelegate(ks::Object::Key const &key,
+                     Scene* scene,
                      shared_ptr<Widget> parent) :
-            Widget(key,parent,"")
+            Widget(key,scene,parent)
         {}
 
         void Init(ks::Object::Key const &,

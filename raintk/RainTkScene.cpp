@@ -178,9 +178,9 @@ namespace raintk
 
         // Create the root widget
         m_root_widget =
-                MakeWidget<Widget>(
-                    Widget::RootWidgetKey{},
-                    this_scene);
+                ks::MakeObject<Widget>(
+                    this,
+                    nullptr);
 
         m_root_widget->clip = true;
 

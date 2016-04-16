@@ -61,10 +61,10 @@ int main(int argc, char* argv[])
     };
 
     using raintk::mm;
-
+    auto scene = c.scene.get();
     auto root = c.scene->GetRootWidget();
 
-    grid = raintk::MakeWidget<raintk::Grid>(root,"grid");
+    grid = raintk::MakeWidget<raintk::Grid>(scene,root);
     grid->row_spacing = mm(2);
     grid->col_spacing = mm(2);
     grid->layout_direction = raintk::Grid::LayoutDirection::TopToBottomRTL;
@@ -73,7 +73,8 @@ int main(int argc, char* argv[])
     {
         auto rect =
                 raintk::MakeWidget<raintk::Rectangle>(
-                    grid,"rect"+ks::ToString(i));
+                    scene,
+                    grid);
 
         rect->width = mm(list_dims[i-1].x);
         rect->height = mm(list_dims[i-1].y);
@@ -84,7 +85,8 @@ int main(int argc, char* argv[])
 
     auto rectx =
             raintk::MakeWidget<raintk::Rectangle>(
-                root,"rectx");
+                scene,
+                root);
 
     raintk::Grid& gridref = *grid;
 
@@ -97,7 +99,7 @@ int main(int argc, char* argv[])
             ks::MakeObject<ks::CallbackTimer>(
                 c.scene->GetEventLoop(),
                 ks::Milliseconds(1000),
-                [](){
+                [&](){
                     auto dim_w = list_items[0]->width.Get();
                     auto dim_h = list_items[0]->height.Get();
                     auto dim_c = list_items[0]->color.Get();
@@ -107,7 +109,8 @@ int main(int argc, char* argv[])
 
                     auto rect =
                             raintk::MakeWidget<raintk::Rectangle>(
-                                grid,"rect");
+                                scene,
+                                grid);
 
                     rect->width = dim_w;
                     rect->height = dim_h;

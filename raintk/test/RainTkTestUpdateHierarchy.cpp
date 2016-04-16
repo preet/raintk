@@ -31,11 +31,12 @@ int main(int argc, char* argv[])
     TestContext c;
 
     // Add fonts
+    auto scene = c.scene.get();
     auto root = c.scene->GetRootWidget();
 
-    auto rect = MakeWidget<Rectangle>(root,"rect");
+    auto rect = MakeWidget<Rectangle>(scene,root);
 
-    auto words = MakeWidget<Text>(rect,"words");
+    auto words = MakeWidget<Text>(scene,rect);
 
     rect->width = [&](){ return words->width.Get() + mm(5); };
     rect->height = [&](){ return words->height.Get() + mm(5); };

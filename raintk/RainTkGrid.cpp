@@ -28,9 +28,9 @@ namespace raintk
     // =========================================================== //
 
     Grid::Grid(ks::Object::Key const &key,
-                   shared_ptr<Widget> parent,
-                   std::string name) :
-        Widget(key,parent,name)
+               Scene* scene,
+               shared_ptr<Widget> parent) :
+        Widget(key,scene,parent)
     {
 
     }

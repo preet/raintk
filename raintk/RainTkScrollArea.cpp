@@ -129,19 +129,30 @@ namespace raintk
     // =========================================================== //
 
     ScrollArea::ScrollArea(ks::Object::Key const &key,
-                           shared_ptr<Widget> parent,
-                           std::string name) :
-        InputArea(key,parent,name)
+                           Scene* scene,
+                           shared_ptr<Widget> parent) :
+        InputArea(key,scene,parent)
     {}
 
     void ScrollArea::Init(ks::Object::Key const &,
                           shared_ptr<ScrollArea> const &this_scroll_area)
     {
         // Create the content parent
+
+        // We need to create the content parent first
+        // as an independent widget before parenting it
+        // because we do a name check when its added
+        // as a child of this scroll area
         m_content_parent =
                 MakeWidget<Widget>(
-                    this_scroll_area,
-                    name+".content_parent");
+                    m_scene,
+                    nullptr);
+
+        m_content_parent->name =
+                ks::ToString(GetId())+
+                ".content_parent";
+
+        this->AddChild(m_content_parent);
 
         // Set some default content dimensions
         m_content_parent->width = mm(250);
@@ -299,7 +310,7 @@ namespace raintk
     {
         bool const is_content_parent =
                 GetChildren().empty() &&
-                (child->name == (name+".content_parent"));
+                (child->name == (ks::ToString(GetId())+".content_parent"));
 
         if(!is_content_parent)
         {

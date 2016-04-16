@@ -93,14 +93,14 @@ int main(int argc, char* argv[])
     (void)argv;
 
     TestContext c(800,480);
-
+    auto scene = c.scene.get();
     auto root = c.scene->GetRootWidget();
 
     // =========================================================== //
 
     // When content area is smaller than scroll area
 
-    auto rect_tl = MakeWidget<Rectangle>(root,"rl");
+    auto rect_tl = MakeWidget<Rectangle>(scene,root);
     rect_tl->width = root->width.Get()*0.33f;
     rect_tl->height = root->height.Get()*0.5f;
     rect_tl->x = 0.0f;
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 
     auto scroll_area_tl =
             MakeWidget<ScrollArea>(
-                rect_tl,"scroll_area_tl");
+                scene,rect_tl);
 
     scroll_area_tl->width = rect_tl->width.Get();
     scroll_area_tl->height = rect_tl->height.Get();
@@ -124,8 +124,7 @@ int main(int argc, char* argv[])
 
     auto image_tl =
             MakeWidget<Image>(
-                scroll_area_tl->GetContentParent(),
-                "image_tl");
+                scene,scroll_area_tl->GetContentParent());
 
     image_tl->width = scroll_area_tl->GetContentParent()->width.Get();
     image_tl->height = scroll_area_tl->GetContentParent()->height.Get();
@@ -140,7 +139,7 @@ int main(int argc, char* argv[])
     // =========================================================== //
 
     // Animate content area lager than view <---> content area smaller than view
-    auto rect_bl = MakeWidget<Rectangle>(root,"bl");
+    auto rect_bl = MakeWidget<Rectangle>(scene,root);
     rect_bl->width = root->width.Get()*0.33;
     rect_bl->height = root->height.Get()*0.5;
     rect_bl->x = 0.0f;
@@ -148,12 +147,12 @@ int main(int argc, char* argv[])
     rect_bl->z = 1;
     rect_bl->color = glm::vec3(60,80,60);
 
-    Property<float> animated_size{"",scroll_area_tl->width.Get()*0.75};
+    Property<float> animated_size{scroll_area_tl->width.Get()*0.75f};
 
 
     auto scroll_area_bl =
             MakeWidget<ScrollArea>(
-                rect_bl,"scroll_area_bl");
+                scene,rect_bl);
 
     scroll_area_bl->width = rect_bl->width.Get();
     scroll_area_bl->height = rect_bl->height.Get();
@@ -177,8 +176,7 @@ int main(int argc, char* argv[])
 
     auto image_bl =
             MakeWidget<Image>(
-                scroll_area_bl->GetContentParent(),
-                "image_bl");
+                scene,scroll_area_bl->GetContentParent());
 
     image_bl->width = [&](){ return scroll_area_bl->GetContentParent()->width.Get(); };
     image_bl->height = [&](){ return scroll_area_bl->GetContentParent()->height.Get(); };
@@ -194,7 +192,7 @@ int main(int argc, char* argv[])
 
     // When content area is larger than scroll area
 
-    auto rect_right = MakeWidget<Rectangle>(root,"rect_right");
+    auto rect_right = MakeWidget<Rectangle>(scene,root);
     rect_right->width = root->width.Get()*0.66f;
     rect_right->height = root->height.Get();
     rect_right->x = root->width.Get()*0.33f;
@@ -205,7 +203,7 @@ int main(int argc, char* argv[])
 
     auto scroll_area_right =
             MakeWidget<ScrollArea>(
-                rect_right,"scroll_area_right");
+                scene,rect_right);
 
     scroll_area_right->width = rect_right->width.Get();
     scroll_area_right->height = rect_right->height.Get();
@@ -218,8 +216,7 @@ int main(int argc, char* argv[])
 
     auto image_right =
             MakeWidget<Image>(
-                scroll_area_right->GetContentParent(),
-                "image_right");
+                scene,scroll_area_right->GetContentParent());
 
     image_right->width = scroll_area_right->GetContentParent()->width.Get();
     image_right->height = scroll_area_right->GetContentParent()->height.Get();
@@ -234,8 +231,8 @@ int main(int argc, char* argv[])
     // Add some scroll bars
     auto v_scroll_bar =
             MakeWidget<ScrollBar>(
+                scene,
                 rect_right,
-                "",
                 scroll_area_right.get(),
                 scroll_area_right->GetContentParent().get());
 
@@ -244,8 +241,8 @@ int main(int argc, char* argv[])
 
     auto h_scroll_bar =
             MakeWidget<ScrollBar>(
+                scene,
                 rect_right,
-                "",
                 scroll_area_right.get(),
                 scroll_area_right->GetContentParent().get());
 

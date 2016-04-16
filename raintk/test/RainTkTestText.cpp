@@ -35,12 +35,13 @@ int main(int argc, char* argv[])
     glm::u8vec3 color_bg{25,25,25};
     glm::u8vec3 color_fg{228,228,228};
 
-    auto root =
-            c.scene->GetRootWidget();
+    auto scene = c.scene.get();
+
+    auto root = c.scene->GetRootWidget();
 
     auto rect =
             raintk::MakeWidget<raintk::Rectangle>(
-                root,"rect");
+                scene,root);
 
     rect->width = root->width.Get();
     rect->height = root->height.Get();
@@ -48,7 +49,7 @@ int main(int argc, char* argv[])
 
     auto divider =
             raintk::MakeWidget<raintk::Rectangle>(
-                root,"divider");
+                scene,root);
 
     divider->width = raintk::mm(0.5);
     divider->height = root->height.Get();
@@ -59,7 +60,7 @@ int main(int argc, char* argv[])
     // Left Column
     auto left_column =
             raintk::MakeWidget<raintk::Column>(
-                root,"column");
+                scene,root);
 
     left_column->y = raintk::mm(2.0);
     left_column->spacing = raintk::mm(2.5);
@@ -67,7 +68,7 @@ int main(int argc, char* argv[])
     auto make_text =
             [&]() -> ks::shared_ptr<raintk::Text>
             {
-                auto t = raintk::MakeWidget<raintk::Text>(left_column,"");
+                auto t = raintk::MakeWidget<raintk::Text>(scene,left_column);
                 t->font = "FiraSansMinimal.ttf";
                 t->color = color_fg;
                 t->x = raintk::mm(2);
@@ -120,7 +121,7 @@ int main(int argc, char* argv[])
     // Right Column
     auto right_column =
             raintk::MakeWidget<raintk::Column>(
-                root,"column");
+                scene,root);
 
     right_column->y = raintk::mm(2.0);
 
@@ -133,7 +134,7 @@ int main(int argc, char* argv[])
     auto make_smaller_text =
             [&]() -> ks::shared_ptr<raintk::Text>
             {
-                auto t = raintk::MakeWidget<raintk::Text>(right_column,"");
+                auto t = raintk::MakeWidget<raintk::Text>(scene,right_column);
                 t->font = "FiraSansMinimal.ttf";
                 t->color = color_fg;
                 t->x = raintk::mm(2) + 300;

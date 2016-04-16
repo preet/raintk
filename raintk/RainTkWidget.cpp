@@ -33,27 +33,10 @@ namespace raintk
     // ============================================================= //
 
     Widget::Widget(ks::Object::Key const &key,
-                   RootWidgetKey const &,
-                   shared_ptr<Scene> scene) :
+                   Scene* scene,
+                   shared_ptr<Widget> parent) :
         ks::Object(key,scene->GetEventLoop()),
-        name("root"),
-        m_scene(scene.get()),
-        m_cmlist_update_data(
-            static_cast<UpdateDataComponentList*>(
-                m_scene->template GetComponentList<UpdateData>())),
-        m_cmlist_xf_data(
-            static_cast<TransformDataComponentList*>(
-                m_scene->template GetComponentList<TransformData>()))
-    {
-
-    }
-
-    Widget::Widget(ks::Object::Key const &key,
-                   shared_ptr<Widget> parent,
-                   std::string name) :
-        ks::Object(key,parent->GetEventLoop()),
-        name(std::move(name)),
-        m_scene(parent->m_scene),
+        m_scene(scene),
         m_parent(parent),
         m_cmlist_update_data(
             static_cast<UpdateDataComponentList*>(
@@ -61,9 +44,7 @@ namespace raintk
         m_cmlist_xf_data(
             static_cast<TransformDataComponentList*>(
                 m_scene->template GetComponentList<TransformData>()))
-    {
-        signal_destroying_widget.Emit(this);
-    }
+    {}
 
     void Widget::Init(ks::Object::Key const &,
                       shared_ptr<Widget> const &this_widget)
@@ -81,7 +62,7 @@ namespace raintk
 
         // Add this widget as a child of its parent
         auto parent = m_parent.lock();
-        if(parent) { // no parent means this is the root widget
+        if(parent) {
             parent->AddChild(this_widget);
         }
 
@@ -178,6 +159,8 @@ namespace raintk
 
     Widget::~Widget()
     {
+        signal_destroying_widget.Emit(this);
+
         m_scene->RemoveEntity(m_entity_id);
     }
 
@@ -227,6 +210,12 @@ namespace raintk
 
             throw ChildAlreadyExists(s);
         }
+
+        shared_ptr<Widget> this_widget =
+                std::static_pointer_cast<Widget>(
+                    shared_from_this());
+
+        child->m_parent = this_widget;
     }
 
     void Widget::RemoveChild(shared_ptr<Widget> const &child)
@@ -239,6 +228,8 @@ namespace raintk
 
             throw ChildDoesNotExist(s);
         }
+
+        child->m_parent.reset();
     }
 
     namespace
@@ -356,12 +347,10 @@ namespace raintk
             return false;
         }
 
-        return true;
-
         // Point in poly test, takes clipping into account
         // poly_vx is in world coordinates
-//        auto const &poly_vx = xf_data.poly_vx;
-//        return CalcPointInPoly(poly_vx,world_point);
+        auto const &poly_vx = xf_data.poly_vx;
+        return CalcPointInPoly(poly_vx,world_point);
     }
 
     void Widget::onWidthChanged()

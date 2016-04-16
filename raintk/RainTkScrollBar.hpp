@@ -36,11 +36,11 @@ namespace raintk
         };
 
         ScrollBar(ks::Object::Key const & key,
+                  Scene* scene,
                   shared_ptr<Widget> parent,
-                  std::string name,
                   Widget* view_widget,
                   Widget* content_widget) :
-            Widget(key,parent,name),
+            Widget(key,scene,parent),
             m_view_widget(view_widget),
             m_content_widget(content_widget)
         {}
@@ -56,14 +56,16 @@ namespace raintk
                         ks::ConnectionType::Direct);
 
             // Create a scroll track and grip
-            auto track = MakeWidget<Rectangle>(this_scroll_bar,"track");
-            track->width = [this](){ rtklog.Trace() << "#: width: " << width.Get(); return width.Get(); };
-            track->height = [this](){ rtklog.Trace() << "#: height: " << height.Get(); return height.Get(); };
+            auto track = MakeWidget<Rectangle>(m_scene,this_scroll_bar);
+            track->name = "track";
+            track->width = [this](){ return width.Get(); };
+            track->height = [this](){ return height.Get(); };
             track->color = [this](){ return track_color.Get(); };
             track->opacity = [this](){ return track_opacity.Get(); };
             track->z = [this](){ return track_z.Get(); };
 
-            auto grip = MakeWidget<Rectangle>(this_scroll_bar,"grip");
+            auto grip = MakeWidget<Rectangle>(m_scene,this_scroll_bar);
+            grip->name = "grip";
             grip->color = [this](){ return grip_color.Get(); };
             grip->opacity = [this](){ return grip_opacity.Get(); };
             grip->z = [this](){ return grip_z.Get(); };
@@ -81,35 +83,35 @@ namespace raintk
         // Properties
 
         Property<Direction> direction{
-            name+".direction",Direction::Vertical
+            Direction::Vertical
         };
 
         Property<float> thickness{
-            name+".thickness",mm(2.0f)
+            mm(2.0f)
         };
 
         Property<glm::u8vec3> track_color{
-            name+".track_color",glm::u8vec3(0,0,0)
+            glm::u8vec3(0,0,0)
         };
 
         Property<float> track_opacity{
-            name+".track_opacity",1.0f
+            1.0f
         };
 
         Property<float> track_z{
-            name+".track_z",0.0f
+            0.0f
         };
 
         Property<glm::u8vec3> grip_color{
-            name+".grip_color",glm::u8vec3(100,100,100)
+            glm::u8vec3(100,100,100)
         };
 
         Property<float> grip_opacity{
-            name+".grip_opacity",1.0f
+            1.0f
         };
 
         Property<float> grip_z{
-            name+".grip_z",0.1f
+            0.1f
         };
 
     private:

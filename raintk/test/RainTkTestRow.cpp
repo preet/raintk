@@ -32,6 +32,8 @@ int main(int argc, char* argv[])
 
     TestContext c;
 
+    auto scene = c.scene.get();
+
     // colors
     std::vector<glm::u8vec3> list_colors {
         glm::u8vec3{255,0,0}, // r
@@ -61,7 +63,8 @@ int main(int argc, char* argv[])
     // Test simple LTR
     auto row_ltr =
             raintk::MakeWidget<raintk::Row>(
-                c.scene->GetRootWidget(),"row_ltr");
+                scene,
+                scene->GetRootWidget());
 
     row_ltr->x = mm(2);
     row_ltr->y = mm(2);
@@ -73,7 +76,8 @@ int main(int argc, char* argv[])
     {
         auto rect =
                 raintk::MakeWidget<raintk::Rectangle>(
-                    row_ltr,"row_ltr_rect"+ks::ToString(i));
+                    scene,
+                    row_ltr);
 
         rect->width = mm(list_dims[i-1].x);
         rect->height = mm(list_dims[i-1].y);
@@ -84,7 +88,8 @@ int main(int argc, char* argv[])
     // Test simple RTL
     auto row_rtl =
             raintk::MakeWidget<raintk::Row>(
-                c.scene->GetRootWidget(),"row_rtl");
+                scene,
+                c.scene->GetRootWidget());
 
     row_rtl->x = mm(2);
     row_rtl->y = mm(2) + mm(2) + mm(10);
@@ -96,7 +101,8 @@ int main(int argc, char* argv[])
     {
         auto rect =
                 raintk::MakeWidget<raintk::Rectangle>(
-                    row_rtl,"row_rtl_rect"+ks::ToString(i));
+                    scene,
+                    row_rtl);
 
         rect->width = mm(list_dims[i-1].x);
         rect->height = mm(list_dims[i-1].y);
@@ -107,7 +113,8 @@ int main(int argc, char* argv[])
     // Test changing row item sizes
     auto row_upd =
             raintk::MakeWidget<raintk::Row>(
-                c.scene->GetRootWidget(),"row_dyn");
+                scene,
+                c.scene->GetRootWidget());
 
     row_upd->x = mm(2);
     row_upd->y = mm(2+2+2+10+10);
@@ -119,7 +126,8 @@ int main(int argc, char* argv[])
     {
         auto rect =
                 raintk::MakeWidget<raintk::Rectangle>(
-                    row_upd,"row_upd_rect"+ks::ToString(i));
+                    scene,
+                    row_upd);
 
         rect->width = mm(10);
         rect->height = mm(list_dims[i-1].y);

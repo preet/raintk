@@ -24,19 +24,23 @@ int main(int argc, char* argv[])
 
     TestContext c;
 
-    auto draw_system = c.scene->GetDrawSystem();
+    auto scene = c.scene.get();
+
+    auto draw_system = scene->GetDrawSystem();
     SetupDrawSystem(draw_system);
 
     draw_system->SetShowBoundingBoxes(true);
-    auto root = c.scene->GetRootWidget();
+    auto root = scene->GetRootWidget();
 
-    auto widget = MakeWidget<Widget>(root,"bbox_test");
+    auto widget = MakeWidget<Widget>(scene,root);
+    widget->name = "bbox_test";
     widget->width = mm(50);
     widget->height = mm(25);
     widget->x = mm(10);
     widget->y = mm(10);
 
-    auto w2 = MakeWidget<Widget>(widget,"bbox2");
+    auto w2 = MakeWidget<Widget>(scene,widget);
+    w2->name = "bbox2";
     w2->x = mm(20);
     w2->y = mm(20);
     w2->width = mm(35);

@@ -73,7 +73,6 @@ namespace raintk
         TransformSystem* GetTransformSystem() const;
         DrawSystem* GetDrawSystem() const;
 
-
         shared_ptr<Widget> const &GetRootWidget() const;
         Id GetMainDrawStageId() const;
         MainDrawStage* GetMainDrawStage() const; // debug
@@ -87,7 +86,6 @@ namespace raintk
         uint GetTextGlyphSDFSizePx() const;
 #endif
 
-
         template<typename... Args>
         bool GetEntityHasComponents(Id ent_id) const
         {
@@ -96,6 +94,7 @@ namespace raintk
         }
 
         void SetShowDebugText(bool show);
+
 
 #ifdef RAINTK_BUILD_DEBUG
         ks::Signal<> signal_before_update;

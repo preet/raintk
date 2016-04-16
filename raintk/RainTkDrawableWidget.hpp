@@ -34,8 +34,8 @@ namespace raintk
         friend class raintk::DrawSystem;
 
         DrawableWidget(ks::Object::Key const &key,
-                      shared_ptr<Widget> parent,
-                      std::string name);
+                       Scene* scene,
+                       shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<DrawableWidget> const &);
@@ -46,11 +46,11 @@ namespace raintk
 
         // Properties
         Property<bool> visible {
-            name+".visible",true
+            true
         };
 
         Property<float> opacity {
-            name+".opacity",1.0f
+            1.0f
         };
 
         template<typename T>

@@ -60,8 +60,8 @@ namespace raintk
 
 
         ScrollArea(ks::Object::Key const &key,
-                   shared_ptr<Widget> parent,
-                   std::string name);
+                   Scene* scene,
+                   shared_ptr<Widget> parent);
 
         void Init(ks::Object::Key const &,
                   shared_ptr<ScrollArea> const &);
@@ -109,13 +109,13 @@ namespace raintk
 
         // Properties
         Property<Direction> direction{
-            name+".direction",Direction::HorizontalAndVertical
+            Direction::HorizontalAndVertical
         };
 
         // Sets whether or not a continued scrolling animation
         // occurs after input activity has stopped
         Property<bool> flick{
-            name+".flick",true
+            true
         };
 
 

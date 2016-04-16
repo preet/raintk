@@ -25,19 +25,22 @@ using namespace raintk;
 
 shared_ptr<SinglePointArea> CreateButton(shared_ptr<Widget> parent)
 {
-    auto button = MakeWidget<SinglePointArea>(parent,"button");
+    auto scene = parent->GetScene();
+
+    auto button = MakeWidget<SinglePointArea>(scene,parent);
     button->width = mm(30);
     button->height = mm(10);
     button->x = mm(30);
     button->y = mm(30);
     button->z = mm(-2); // must be behind the ScrollArea
 
-    auto bg = MakeWidget<Rectangle>(button,"bg");
+    auto bg = MakeWidget<Rectangle>(scene,button);
+    bg->name = "bg";
     bg->width = button->width.Get();
     bg->height = button->height.Get();
     bg->color = glm::u8vec3(0,0,0);
 
-    auto text = MakeWidget<Text>(button,"");
+    auto text = MakeWidget<Text>(scene,button);
     text->color = glm::u8vec3(255,255,255);
     text->text = "Click Me";
     text->z = mm(2);
@@ -52,16 +55,18 @@ int main(int argc, char* argv[])
     (void)argv;
 
     TestContext c;
+    auto scene = c.scene.get();
     auto root = c.scene->GetRootWidget();
 
-    auto bg = MakeWidget<Rectangle>(root,"bg");
+    auto bg = MakeWidget<Rectangle>(scene,root);
+    bg->name = "bg";
     bg->width = mm(90);
     bg->height = mm(90);
     bg->x = 0.5*(root->width.Get()-bg->width.Get());
     bg->y = 0.5*(root->height.Get()-bg->height.Get());
     bg->color = glm::u8vec3(60,60,60);
 
-    auto sa = MakeWidget<ScrollArea>(bg,"sa");
+    auto sa = MakeWidget<ScrollArea>(scene,bg);
     sa->width = bg->width.Get();
     sa->height = bg->height.Get();
     sa->clip = true;
@@ -71,7 +76,7 @@ int main(int argc, char* argv[])
     sa->flick = true;
     sa->z = mm(10.0f);
 
-    auto image = MakeWidget<Image>(sa->GetContentParent(),"image");
+    auto image = MakeWidget<Image>(scene,sa->GetContentParent());
     image->width = sa->GetContentParent()->width.Get();
     image->height = sa->GetContentParent()->height.Get();
     image->z = mm(-2.5);
