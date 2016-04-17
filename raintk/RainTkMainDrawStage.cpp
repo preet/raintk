@@ -130,6 +130,14 @@ namespace raintk
         // TODO
     }
 
+    namespace
+    {
+        float GetFraction(float f)
+        {
+            return (f - sint(f));
+        }
+    }
+
     void MainDrawStage::setupState(glm::vec4 const &viewport,
                                    ks::gl::Camera<float> const &camera,
                                    ks::draw::DrawParams<DrawKey>& p,
@@ -165,14 +173,48 @@ namespace raintk
                 auto const ndc_clip_bl = m4_pv*glm::vec4(clip.x,clip.w,0,1);
                 auto const ndc_clip_tr = m4_pv*glm::vec4(clip.z,clip.y,0,1);
 
-                float clip_x = 0.5*(ndc_clip_bl.x+1.0)*viewport.z;
-                float clip_y = 0.5*(ndc_clip_bl.y+1.0)*viewport.w;
-                float clip_w = (0.5*(ndc_clip_tr.x+1.0))*viewport.z - clip_x;
-                float clip_h = (0.5*(ndc_clip_tr.y+1.0))*viewport.w - clip_y;
+                float clip_x0 = 0.5*(ndc_clip_bl.x+1.0)*viewport.z;
+                float clip_y0 = 0.5*(ndc_clip_bl.y+1.0)*viewport.w;
+                float clip_x1 = (0.5*(ndc_clip_tr.x+1.0))*viewport.z;
+                float clip_y1 = (0.5*(ndc_clip_tr.y+1.0))*viewport.w;
+
+                // clip_x,y,w,h are now in window coordinates with (0,0)
+                // representing the bottom left of the window
+
+                // A pixel is considered inside the clip rectangle if:
+                // * It contains the pixel center (0.5,0.5)
+                // * The left edge is on the pixel center
+                // * The top edge is on the pixel center
+                // ref: https://msdn.microsoft.com/en-us/library/windows/desktop/cc627092(v=vs.85).aspx
+
+                // We need to compensate for the above cases because the
+                // coordinates will be truncated when they are converted
+                // to integers for the glScissor call
+
+                sint clip_x0_px = clip_x0+0.5f;
+                sint clip_y0_px = clip_y0;
+                sint clip_x1_px = clip_x1;
+                sint clip_y1_px = clip_y1+0.5f;
+
+                // bottom
+                if(GetFraction(clip_y0) >= 0.5f)
+                {
+                    clip_y0_px++;
+                }
+
+                // right
+                if(GetFraction(clip_x1) > 0.5f)
+                {
+                    clip_x1_px++;
+                }
 
                 // TODO clip should consider viewport x,y; currently we
                 // only consider the width and height of the viewport
-                ks::gl::Scissor(clip_x,clip_y,clip_w,clip_h);
+                ks::gl::Scissor(
+                            clip_x0_px,
+                            clip_y0_px,
+                            clip_x1_px-clip_x0_px,
+                            clip_y1_px-clip_y0_px);
             }
 
             if(prev_key.GetShader() != curr_key.GetShader())
