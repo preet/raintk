@@ -18,6 +18,7 @@
 #define RAINTK_TEST_CONTEXT_HPP
 
 #include <ks/gui/KsGuiApplication.hpp>
+#include <ks/platform/KsPlatformMain.hpp>
 #include <raintk/RainTkGlobal.hpp>
 #include <raintk/RainTkUnits.hpp>
 #include <raintk/RainTkScene.hpp>
