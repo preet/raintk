@@ -43,7 +43,8 @@ namespace raintk
         ks::ecs::Scene<SceneKey>(key,app->GetEventLoop()),
         m_app(app),
         m_window(window),
-        m_running(false)
+        m_running(false),
+        m_sync_pending(false)
     {
         if(window->swap_interval.Get() == 0)
         {
@@ -196,6 +197,17 @@ namespace raintk
         this->onWinSizeChanged(window->size.Get());
 
 
+        // Idle Timer
+        // This timer is started when the application is paused
+        // to receive background events, if any. It is stopped
+        // once the application is resumed
+        m_idle_timer =
+                ks::MakeObject<ks::CallbackTimer>(
+                    this->GetEventLoop(),
+                    Milliseconds(200),
+                    [this](){ m_signal_app_process_events.Emit(); });
+
+
         // Text TODO: Allow these params to be changed?
 #ifdef RAINTK_TEXT_ENABLED
         m_text_manager =
@@ -270,16 +282,18 @@ namespace raintk
 
     void Scene::onAppPause()
     {
-        rtklog.Trace() << "onAppPause";
+        rtklog.Trace() << "onAppPause (" << std::this_thread::get_id() << ")";
         m_running = false;
+        m_idle_timer->Start();
     }
 
     void Scene::onAppResume()
     {
-        rtklog.Trace() << "onAppResume";
+        rtklog.Trace() << "onAppResume (" << std::this_thread::get_id() << ")";
+        m_idle_timer->Stop();
         m_prev_upd_time = std::chrono::high_resolution_clock::now();
         m_running = true;
-        m_signal_app_process_events.Emit();
+        //m_signal_app_process_events.Emit();
     }
 
     void Scene::onAppQuit()
@@ -308,25 +322,45 @@ namespace raintk
     {
         if(m_running)
         {
-            // Update
-            this->onUpdate();
-
-
-            // Sync
             auto win_ptr = m_window.lock().get();
 
-            auto sync_task =
-                    make_shared<ks::Task>(
-                        [this,win_ptr](){
-                            if(win_ptr->SetContextCurrent())
-                            {
-                                this->onSync();
-                            }
-                        });
+            if(m_sync_pending)
+            {
+                // Sync
+                auto sync_task =
+                        make_shared<ks::Task>(
+                            [this,win_ptr](){
+                                if(win_ptr->SetContextCurrent())
+                                {
+                                    this->onSync();
+                                    m_sync_pending = false;
+                                }
+                            });
 
-            win_ptr->GetEventLoop()->PostTask(sync_task);
-            sync_task->Wait();
+                win_ptr->GetEventLoop()->PostTask(sync_task);
+                sync_task->Wait();
+            }
+            else
+            {
+                // Update
+                this->onUpdate();
 
+                m_sync_pending = true;
+
+                // Sync
+                auto sync_task =
+                        make_shared<ks::Task>(
+                            [this,win_ptr](){
+                                if(win_ptr->SetContextCurrent())
+                                {
+                                    this->onSync();
+                                    m_sync_pending = false;
+                                }
+                            });
+
+                win_ptr->GetEventLoop()->PostTask(sync_task);
+                sync_task->Wait();
+            }
 
             // Render
             auto render_task =
@@ -463,6 +497,7 @@ namespace raintk
         signal_before_update.Emit();
 #endif
 
+//        rtklog.Trace() << "U " << std::this_thread::get_id();
         TimePoint const curr_upd_time =
                 std::chrono::high_resolution_clock::now();
 
@@ -499,6 +534,7 @@ namespace raintk
 
     void Scene::onSync()
     {
+//        rtklog.Trace() << "S " << std::this_thread::get_id();
         m_render_system->Sync();
 
         m_main_draw_stage->SyncView(

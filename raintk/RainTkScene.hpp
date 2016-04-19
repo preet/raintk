@@ -142,7 +142,9 @@ namespace raintk
         // App update loop
         ks::Signal<> m_signal_app_process_events;
         std::atomic<bool> m_running;
+        std::atomic<bool> m_sync_pending;
         TimePoint m_prev_upd_time;
+        shared_ptr<ks::CallbackTimer> m_idle_timer;
 
         // Root widget
         shared_ptr<Widget> m_root_widget;
