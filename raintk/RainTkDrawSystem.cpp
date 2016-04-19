@@ -742,6 +742,16 @@ namespace raintk
                     transparency);
 
         auto& merged_gm = render_data.GetGeometry();
+
+        // NOTE: We set retain geometry to false because we recreate
+        //       RenderData every time DrawData is updated. This also
+        //       ensures that if DrawSystem->Update is called multiple
+        //       times without a corresponding Sync, we don't have to
+        //       keep the corresponding Geometry alive until the Sync
+        //       occurs.
+
+        merged_gm.SetRetainGeometry(false);
+
         merged_gm.GetVertexBuffers().
                 push_back(make_unique<std::vector<u8>>());
 
