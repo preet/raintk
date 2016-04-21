@@ -87,6 +87,27 @@ namespace raintk
 //            }
         }
 
+        void OnTouchInput(ks::gui::TouchEvent touch_event)
+        {
+            // TODO support additional touch points
+            if(touch_event.index > 2)
+            {
+                return;
+            }
+
+            InputArea::Point touch_point{
+                // Type=0 is Mouse, Type=1 is Touch0, etc
+                static_cast<InputArea::Point::Type>(touch_event.index+1),
+                InputArea::Point::Button::None,
+                static_cast<InputArea::Point::Action>(touch_event.action),
+                px(touch_event.x),
+                px(touch_event.y),
+                touch_event.timestamp
+            };
+
+            list_points.push_back(touch_point);
+        }
+
         void ResampleInputs(TimePoint const &prev_upd_time,
                             TimePoint const &curr_upd_time)
         {
@@ -167,6 +188,11 @@ namespace raintk
         app->signal_mouse_input->Connect(
                     m_input_listener,
                     &InputListener::OnMouseInput,
+                    ks::ConnectionType::Direct);
+
+        app->signal_touch_input->Connect(
+                    m_input_listener,
+                    &InputListener::OnTouchInput,
                     ks::ConnectionType::Direct);
     }
 
