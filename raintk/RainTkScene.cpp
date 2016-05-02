@@ -204,8 +204,10 @@ namespace raintk
         m_idle_timer =
                 ks::MakeObject<ks::CallbackTimer>(
                     this->GetEventLoop(),
-                    Milliseconds(200),
-                    [this](){ m_signal_app_process_events.Emit(); });
+                    Milliseconds(250),
+                    [this](){
+                        m_signal_app_process_events.Emit();
+                    });
 
 
         // Text TODO: Allow these params to be changed?
@@ -247,9 +249,13 @@ namespace raintk
 
 
         // Scene ---> Application
+
+        // This signal is blocking because Application::ProcessEvents
+        // and Scene::onAppProcEvents must be in lock-step
         m_signal_app_process_events.Connect(
                     app,
-                    &ks::gui::Application::ProcessEvents);
+                    &ks::gui::Application::ProcessEvents,
+                    ks::ConnectionType::Blocking);
 
 
         // Window ---> Scene
@@ -274,7 +280,7 @@ namespace raintk
 
     void Scene::onAppInit()
     {
-        rtklog.Trace() << "onAppInit";
+        rtklog.Trace() << "onAppInit (" << std::this_thread::get_id() << ")";
         m_prev_upd_time = std::chrono::high_resolution_clock::now();
         m_running = true;
         m_signal_app_process_events.Emit();
@@ -292,8 +298,13 @@ namespace raintk
         rtklog.Trace() << "onAppResume (" << std::this_thread::get_id() << ")";
         m_idle_timer->Stop();
         m_prev_upd_time = std::chrono::high_resolution_clock::now();
-        m_running = true;
-        //m_signal_app_process_events.Emit();
+
+        if(m_running==false)
+        {
+            m_running = true;
+            m_signal_app_process_events.Emit();
+        }
+
     }
 
     void Scene::onAppQuit()
@@ -376,9 +387,6 @@ namespace raintk
 
             win_ptr->GetEventLoop()->PostTask(render_task);
 
-
-            // Schedule next update, vsync will eventually
-            // block this until the next vblank
             m_signal_app_process_events.Emit();
         }
     }
