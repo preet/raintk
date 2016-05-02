@@ -73,6 +73,7 @@ HEADERS += \
     $${PATH_RAINTK}/raintk/RainTkTween.hpp \
     $${PATH_RAINTK}/raintk/RainTkPropertyAnimation.hpp \
     $${PATH_RAINTK}/raintk/RainTkMainDrawStage.hpp \
+    $${PATH_RAINTK}/raintk/RainTkInputListener.hpp \
     $${PATH_RAINTK}/raintk/RainTkInputSystem.hpp \
     $${PATH_RAINTK}/raintk/RainTkAnimationSystem.hpp \
     $${PATH_RAINTK}/raintk/RainTkTransformSystem.hpp \
@@ -87,6 +88,7 @@ SOURCES += \
     $${PATH_RAINTK}/raintk/RainTkTween.cpp \
     $${PATH_RAINTK}/raintk/RainTkLog.cpp \
     $${PATH_RAINTK}/raintk/RainTkMainDrawStage.cpp \
+    $${PATH_RAINTK}/raintk/RainTkInputListener.cpp \
     $${PATH_RAINTK}/raintk/RainTkInputSystem.cpp \
     $${PATH_RAINTK}/raintk/RainTkAnimationSystem.cpp \
     $${PATH_RAINTK}/raintk/RainTkTransformSystem.cpp \
@@ -102,16 +104,29 @@ HEADERS += \
 SOURCES += \
     $${PATH_RAINTK}/raintk/RainTkListModel.cpp
 
+# helpers
+HEADERS += \
+    $${PATH_RAINTK}/raintk/RainTkAlignment.hpp
+
+SOURCES += \
+    $${PATH_RAINTK}/raintk/RainTkAlignment.cpp
+
+
+# widget
+HEADERS += \
+    $${PATH_RAINTK}/raintk/RainTkWidget.hpp
+
+SOURCES += \
+    $${PATH_RAINTK}/raintk/RainTkWidget.cpp
+
 # widgets (basic)
 HEADERS += \
-    $${PATH_RAINTK}/raintk/RainTkWidget.hpp \
     $${PATH_RAINTK}/raintk/RainTkDrawableWidget.hpp \
     $${PATH_RAINTK}/raintk/RainTkRectangle.hpp \
     $${PATH_RAINTK}/raintk/RainTkImage.hpp \
     $${PATH_RAINTK}/raintk/RainTkText.hpp
 
 SOURCES += \
-    $${PATH_RAINTK}/raintk/RainTkWidget.cpp \
     $${PATH_RAINTK}/raintk/RainTkDrawableWidget.cpp \
     $${PATH_RAINTK}/raintk/RainTkRectangle.cpp \
     $${PATH_RAINTK}/raintk/RainTkImage.cpp \
@@ -120,17 +135,16 @@ SOURCES += \
 # widgets (inputs)
 HEADERS += \
     $${PATH_RAINTK}/raintk/RainTkInputArea.hpp \
-    $${PATH_RAINTK}/raintk/RainTkMouseArea.hpp \
     $${PATH_RAINTK}/raintk/RainTkSinglePointArea.hpp \
     $${PATH_RAINTK}/raintk/RainTkScrollArea.hpp \
     $${PATH_RAINTK}/raintk/RainTkScrollBar.hpp
+#    $${PATH_RAINTK}/raintk/RainTkMouseArea.hpp \
 
 SOURCES += \
     $${PATH_RAINTK}/raintk/RainTkInputArea.cpp \
-    $${PATH_RAINTK}/raintk/RainTkMouseArea.cpp \
     $${PATH_RAINTK}/raintk/RainTkSinglePointArea.cpp \
-    $${PATH_RAINTK}/raintk/RainTkScrollArea.cpp \
-    $${PATH_RAINTK}/raintk/RainTkScrollBar.cpp
+    $${PATH_RAINTK}/raintk/RainTkScrollArea.cpp
+#    $${PATH_RAINTK}/raintk/RainTkMouseArea.cpp \
 
 # widgets (layout)
 HEADERS += \
@@ -142,10 +156,6 @@ SOURCES += \
     $${PATH_RAINTK}/raintk/RainTkColumn.cpp \
     $${PATH_RAINTK}/raintk/RainTkRow.cpp \
     $${PATH_RAINTK}/raintk/RainTkGrid.cpp
-
-# widgets (view)
-HEADERS += \
-    $${PATH_RAINTK}/raintk/RainTkFixedListView.hpp
 
 # test
 DEFINES += RAINTK_DEBUG_TEST_DRAW_SYSTEM
@@ -170,7 +180,7 @@ SOURCES += \
 #    $${PATH_RAINTK}/raintk/test/RainTkTestRectangle.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestAnimation.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestClipping.cpp
-    $${PATH_RAINTK}/raintk/test/RainTkTestClippingPolys.cpp
+#    $${PATH_RAINTK}/raintk/test/RainTkTestClippingPolys.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestImage.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestRow.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestGrid.cpp
@@ -183,6 +193,8 @@ SOURCES += \
 #    $${PATH_RAINTK}/raintk/test/RainTkTestText.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestPropertiesAndUpdateOrder.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestUpdateHierarchy.cpp
+#    $${PATH_RAINTK}/raintk/test/RainTkTestAlignment.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestListView.cpp
+
 
 
