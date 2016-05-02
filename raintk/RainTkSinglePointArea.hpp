@@ -54,7 +54,6 @@ namespace raintk
         ks::Signal<> signal_pressed;
         ks::Signal<> signal_released;
         ks::Signal<> signal_clicked;
-        ks::Signal<> signal_canceled;
 
     private:
         Response handleInput(Point const &,bool) override;
