@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2015 Preet Desai (preet.desai@gmail.com)
+   Copyright (C) 2015-2016 Preet Desai (preet.desai@gmail.com)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 #include <raintk/RainTkInputSystem.hpp>
 #include <raintk/RainTkScene.hpp>
-#include <raintk/RainTkInputArea.hpp>
+#include <raintk/RainTkInputListener.hpp>
 #include <raintk/RainTkLog.hpp>
 
 namespace raintk
@@ -28,34 +28,10 @@ namespace raintk
 
     using InputType = InputArea::Point::Type;
 
-    class InputListener : public ks::Object
+    namespace
     {
-    public:
-        using base_type = ks::Object;
-
-        InputListener(ks::Object::Key const &key,
-                      shared_ptr<ks::EventLoop> event_loop) :
-            ks::Object(key,event_loop)
+        InputArea::Point ConvertToInputPoint(ks::gui::MouseEvent const &mouse_event)
         {
-            std::pair<bool,InputArea::Point> pressed_point;
-            pressed_point.first = false;
-
-//            list_lk_pressed_by_type.resize(
-//                        uint(InputArea::Point::Type::TypeCount),
-//                        pressed_point);
-        }
-
-        void Init(ks::Object::Key const &,
-                  shared_ptr<InputListener> const &)
-        {}
-
-        ~InputListener()
-        {}
-
-        void OnMouseInput(ks::gui::MouseEvent mouse_event)
-        {
-//            uint const mouse_type_idx = uint(InputArea::Point::Type::Mouse);
-
             InputArea::Point mouse_point {
                 InputArea::Point::Type::Mouse,
                 static_cast<InputArea::Point::Button>(mouse_event.button),
@@ -65,36 +41,11 @@ namespace raintk
                 mouse_event.timestamp
             };
 
-            list_points.push_back(mouse_point);
-
-            // NOTE: We no longer do this, see InputSystem
-            // comments for more details
-//            // Save the most recent mouse_event if any mouse
-//            // buttons are being pressed so that the InputSystem
-//            // can repeat last pressed events
-//            if(mouse_point.action == InputArea::Point::Action::Press)
-//            {
-//                list_lk_pressed_by_type[mouse_type_idx].first = true;
-//            }
-//            else if(mouse_point.action == InputArea::Point::Action::Release)
-//            {
-//                list_lk_pressed_by_type[mouse_type_idx].first = false;
-//            }
-
-//            if(list_lk_pressed_by_type[mouse_type_idx].first)
-//            {
-//                list_lk_pressed_by_type[mouse_type_idx].second = mouse_point;
-//            }
+            return mouse_point;
         }
 
-        void OnTouchInput(ks::gui::TouchEvent touch_event)
+        InputArea::Point ConvertToInputPoint(ks::gui::TouchEvent const &touch_event)
         {
-            // TODO support additional touch points
-            if(touch_event.index > 2)
-            {
-                return;
-            }
-
             InputArea::Point touch_point{
                 // Type=0 is Mouse, Type=1 is Touch0, etc
                 static_cast<InputArea::Point::Type>(touch_event.index+1),
@@ -105,68 +56,412 @@ namespace raintk
                 touch_event.timestamp
             };
 
-            list_points.push_back(touch_point);
+            return touch_point;
         }
 
-        void ResampleInputs(TimePoint const &prev_upd_time,
-                            TimePoint const &curr_upd_time)
+//        std::string DebugTimePointToString(TimePoint const &time_point)
+//        {
+//            return "";
+
+//            return ks::ToString(static_cast<u64>(
+//                                  std::chrono::duration_cast<Milliseconds>(
+//                                      time_point.time_since_epoch()).count()));
+//        }
+    }
+
+    // ============================================================= //
+    // ============================================================= //
+
+    class InputRecorder : public ks::Object
+    {
+    public:
+        using base_type = ks::Object;
+
+        InputRecorder(ks::Object::Key const &key,
+                      ks::gui::Application* app,
+                      std::string const &file_path) :
+            ks::Object(key,app->GetEventLoop()),
+            m_app(app),
+            m_file(file_path,std::ios_base::out | std::ios_base::trunc)
+        {}
+
+        void Init(ks::Object::Key const &,
+                  shared_ptr<InputRecorder> const &this_recorder)
         {
-            // For some inputs (mouse) on SDL it seems like
-            // the timestamp reflects when the event is polled
-            // rather than when it actually occurs
+            // Setup connections
+            m_cid_mouse_events =
+                    m_app->signal_mouse_input->Connect(
+                        this_recorder,
+                        &InputRecorder::onMouseEvent,
+                        ks::ConnectionType::Direct);
 
-            // So we just assign the timestamp to always mean
-            // when its polled
+            m_cid_touch_events =
+                    m_app->signal_touch_input->Connect(
+                        this_recorder,
+                        &InputRecorder::onTouchEvent,
+                        ks::ConnectionType::Direct);
+        }
 
-            // This means the timestamp of the event represents
-            // *the end of the interval the event occured in*
+        ~InputRecorder()
+        {}
 
-            // To convert the timestamps to reflect when the
-            // event occured, we resample by linearly interpolating
-            // the events over the interval (this is a guess)
+        void Update(TimePoint const &curr_upd_time)
+        {
+            m_frame++;
+            m_frame_time = curr_upd_time;
+        }
 
-            // @prev_upd_time: start of the interval
-            // @curr_upd_time: end of the interval
+    private:
+        void onMouseEvent(ks::gui::MouseEvent mouse_event)
+        {
+            recordInput(ConvertToInputPoint(mouse_event));
+        }
 
-            // We assume that list_points is cleared between
-            // each call to ResampleInputs
-
-            if(list_points.empty())
+        void onTouchEvent(ks::gui::TouchEvent touch_event)
+        {
+            // We don't currently support more than 3 touch inputs
+            if(touch_event.index > 2)
             {
                 return;
             }
 
-            uint const point_count = list_points.size();
-
-            Microseconds avg_interval =
-                    ks::CalcDuration<Microseconds>(
-                        prev_upd_time,
-                        curr_upd_time);
-
-            avg_interval = Microseconds(avg_interval.count()/(point_count+1));
-
-            for(uint i=0; i < point_count; i++)
-            {
-                list_points[i].timestamp =
-                        prev_upd_time +
-                        Microseconds(avg_interval.count()*(i+1));
-            }
+            recordInput(ConvertToInputPoint(touch_event));
         }
 
+        void recordInput(InputArea::Point const &point)
+        {
+            // Format is
+            // frame,frame_time,timestamp,type,button,action,x,y\n
 
-        std::vector<InputArea::Point> list_points;
+            std::string line;
+            line += ks::ToString(m_frame) + ",";
+            line += ks::ToString(
+                        static_cast<u64>(
+                            std::chrono::duration_cast<Milliseconds>(
+                                m_frame_time.time_since_epoch()).count())) + ",";
+            line += ks::ToString(
+                        static_cast<u64>(
+                            std::chrono::duration_cast<Milliseconds>(
+                                point.timestamp.time_since_epoch()).count())) + ",";
+            line += ks::ToString(static_cast<uint>(point.type)) + ",";
+            line += ks::ToString(static_cast<uint>(point.button)) + ",";
+            line += ks::ToString(static_cast<uint>(point.action)) + ",";
+            line += ks::ToString(static_cast<float>(point.x)) + ",";
+            line += ks::ToString(static_cast<float>(point.y)) + "\n";
 
-//        std::vector<
-//            std::pair<bool,InputArea::Point>
-//        > list_lk_pressed_by_type;
+            rtklog.Trace() << line;
+            m_file << line;
+        }
+
+        ks::gui::Application* m_app;
+        uint m_frame{0};
+        TimePoint m_frame_time;
+        std::ofstream m_file;
+        Id m_cid_mouse_events{0};
+        Id m_cid_touch_events{0};
     };
+
+    // ============================================================= //
+    // ============================================================= //
+
+//    class InputListener : public ks::Object
+//    {
+//        struct InputFrame
+//        {
+//            TimePoint t0{Milliseconds(0)};
+//            TimePoint t1{Milliseconds(0)};
+//        };
+
+//        struct InputPoint
+//        {
+//            uint frame;
+//            InputArea::Point point;
+//        };
+
+//        ks::gui::Application* m_app;
+
+//        uint m_input_buffer_size{4}; // input buffer size in frames
+//        uint m_input_buffer_delay{2}; // input buffer delay in frames,
+//                                      // must be less than m_input_buffer_size
+//        std::vector<std::vector<InputFrame>> m_lkup_input_frames;
+////        std::vector<std::vector<InputArea::Point>> m_lkup_input_history;
+
+//        std::vector<std::vector<InputPoint>> m_lkup_input_history; // use this
+
+//    public:
+//        using base_type = ks::Object;
+
+//        InputListener(ks::Object::Key const &key,
+//                      ks::gui::Application* app) :
+//            ks::Object(key,app->GetEventLoop()),
+//            m_app(app),
+//            m_lkup_input_frames(static_cast<uint>(InputType::TypeCount)),
+//            m_lkup_input_history(static_cast<uint>(InputType::TypeCount))
+//        {
+//            m_lkup_input_frames[static_cast<uint>(InputType::Mouse)].resize(m_input_buffer_size);
+//            m_lkup_input_frames[static_cast<uint>(InputType::Touch0)].resize(m_input_buffer_size);
+//            m_lkup_input_frames[static_cast<uint>(InputType::Touch1)].resize(m_input_buffer_size);
+//            m_lkup_input_frames[static_cast<uint>(InputType::Touch2)].resize(m_input_buffer_size);
+//        }
+
+//        void Init(ks::Object::Key const &,
+//                  shared_ptr<InputListener> const &this_listener)
+//        {
+//            m_app->signal_mouse_input->Connect(
+//                        this_listener,
+//                        &InputListener::OnMouseEvent,
+//                        ks::ConnectionType::Direct);
+
+//            m_app->signal_touch_input->Connect(
+//                        this_listener,
+//                        &InputListener::OnTouchEvent,
+//                        ks::ConnectionType::Direct);
+
+//            m_app->signal_resume.Connect(
+//                        this_listener,
+//                        &InputListener::OnAppResume,
+//                        ks::ConnectionType::Direct);
+//        }
+
+//        ~InputListener()
+//        {}
+
+//        // Should be called every frame
+//        std::vector<InputArea::Point>
+//        GetInputs(TimePoint const &prev_upd_time,
+//                  TimePoint const &curr_upd_time)
+//        {
+//            // All input points for the delayed frame
+//            std::vector<InputArea::Point> list_all_points;
+
+//            uint input_type_idx=0;
+//            for(auto& list_input_frames : m_lkup_input_frames)
+//            {
+//                InputType input_type = static_cast<InputType>(input_type_idx);
+//                input_type_idx++;
+
+//                auto& oldest_frame = list_input_frames[0];
+
+//                // Trim input history
+//                trimHistoryBefore(input_type,oldest_frame.t0); // use t1 instead?
+
+//                // Trim input buffer
+//                list_input_frames.erase(list_input_frames.begin());
+
+//                // Add new input frame
+//                list_input_frames.emplace_back();
+//                auto& newest_frame = list_input_frames.back();
+//                newest_frame.t0 = prev_upd_time;
+//                newest_frame.t1 = curr_upd_time;
+
+//                auto& target_frame = list_input_frames[
+//                        m_input_buffer_size-m_input_buffer_delay];
+
+//                auto list_points =
+//                        collectPointsInRange(
+//                            input_type,
+//                            target_frame.t0,
+//                            target_frame.t1);
+
+//                auto target_time = target_frame.t1 - Milliseconds(1);
+
+//                InputArea::Point interp_point;
+//                if(sampleInputHistory(input_type,target_time,interp_point))
+//                {
+//                    if(list_points.empty())
+//                    {
+//                        list_points.push_back(interp_point);
+//                    }
+//                    else
+//                    {
+//                        for(auto &pt : list_points)
+//                        {
+//                            pt.x = interp_point.x;
+//                            pt.y = interp_point.y;
+//                        }
+//                    }
+//                }
+
+//                // Save the points
+//                list_all_points.insert(
+//                            list_all_points.end(),
+//                            list_points.begin(),
+//                            list_points.end());
+//            }
+
+//            return list_all_points;
+//        }
+
+
+
+//        // [t0, t1)
+//        std::vector<InputArea::Point>
+//        collectPointsInRange(InputType input_type,
+//                             TimePoint const &t0,
+//                             TimePoint const &t1)
+//        {
+//            auto& input_history = m_lkup_input_history[uint(input_type)];
+
+//            std::vector<InputArea::Point> list_points;
+//            for(auto const &pt : input_history)
+//            {
+//                if(pt.timestamp < t0 || pt.timestamp >= t1)
+//                {
+//                    continue;
+//                }
+
+//                list_points.push_back(pt);
+//            }
+
+//            return list_points;
+//        }
+
+//        void trimHistoryBefore(InputType input_type,
+//                               TimePoint const &time)
+//        {
+//            auto& input_history = m_lkup_input_history[uint(input_type)];
+
+//            input_history.erase(
+//                        std::remove_if(
+//                            input_history.begin(),
+//                            input_history.end(),
+//                            [&](InputArea::Point const &p){
+//                                return p.timestamp < time;
+//                            }),
+//                        input_history.end());
+//        }
+
+//        bool sampleInputHistory(InputType input_type,
+//                                TimePoint const &target_time,
+//                                InputArea::Point &point)
+//        {
+//            auto& input_history = m_lkup_input_history[uint(input_type)];
+
+//            point.timestamp = target_time;
+
+//            auto greater_than_or_equal_it =
+//                    std::lower_bound(
+//                        input_history.begin(),
+//                        input_history.end(),
+//                        point,
+//                        [&](InputArea::Point const &a, InputArea::Point const &b){
+//                            return (a.timestamp < b.timestamp);
+//                        });
+
+//            if(greater_than_or_equal_it == input_history.end())
+//            {
+//                // No input points that occur after the target time
+//                return false;
+//            }
+
+//            auto& greater_than_or_equal_pt = *greater_than_or_equal_it;
+
+//            if(greater_than_or_equal_pt.timestamp == point.timestamp)
+//            {
+//                // There's already an Input point with the same timestamp
+//                point = greater_than_or_equal_pt;
+//                return true;
+//            }
+//            if(greater_than_or_equal_it == input_history.begin())
+//            {
+//                // The target time occurs before the earliest
+//                // known input history
+//                return false;
+//            }
+
+//            auto less_than_it = greater_than_or_equal_it;
+//            std::advance(less_than_it,-1);
+
+//            auto& less_than_pt = *less_than_it;
+
+//            if(less_than_pt.action == InputArea::Point::Action::Release)
+//            {
+//                // We can't interpolate as the input has ended
+//                return false;
+//            }
+
+//            bool diff_positions =
+//                    (greater_than_or_equal_pt.x != less_than_pt.x) ||
+//                    (greater_than_or_equal_pt.y != less_than_pt.y);
+
+//            if(!diff_positions)
+//            {
+//                // The input hasn't changed
+//                return false;
+//            }
+
+//            point = less_than_pt;
+
+//            glm::vec2 position =
+//                    InterpolateInputPoints(
+//                        greater_than_or_equal_pt,
+//                        less_than_pt,
+//                        target_time);
+
+//            point.x = position.x;
+//            point.y = position.y;
+
+//            return true;
+//        }
+
+//        static glm::vec2 InterpolateInputPoints(InputArea::Point const &a,
+//                                                InputArea::Point const &b,
+//                                                TimePoint const &t)
+//        {
+//            float total_dt = ks::CalcDuration<Milliseconds>(a.timestamp,b.timestamp).count();
+//            float dt = ks::CalcDuration<Milliseconds>(a.timestamp,t).count();
+
+//            glm::vec2 v;
+//            v.x = (b.x-a.x)*dt/(total_dt) + a.x;
+//            v.y = (b.y-a.y)*dt/(total_dt) + a.y;
+
+//            return v;
+//        }
+
+//        void OnMouseEvent(ks::gui::MouseEvent mouse_event)
+//        {
+//            m_lkup_input_history[static_cast<uint>(InputType::Mouse)].
+//                    push_back(ConvertToInputPoint(mouse_event));
+//        }
+
+//        void OnTouchEvent(ks::gui::TouchEvent touch_event)
+//        {
+//            // We don't currently support more than 3 touch inputs
+//            if(touch_event.index > 2)
+//            {
+//                return;
+//            }
+
+//            uint const type_index =
+//                    static_cast<uint>(touch_event.index+1);
+
+//            m_lkup_input_history[type_index].push_back(
+//                        ConvertToInputPoint(touch_event));
+//        }
+
+//        void OnAppResume()
+//        {
+//            rtklog.Trace() << "InputSystem On App Resume";
+//            for(auto& list_input_frames : m_lkup_input_frames)
+//            {
+//                list_input_frames.clear();
+//                list_input_frames.resize(m_input_buffer_size);
+//            }
+
+//            for(auto& input_history : m_lkup_input_history)
+//            {
+//                input_history.clear();
+//            }
+//        }
+//    };
 
     // ============================================================= //
     // ============================================================= //
 
     InputSystem::InputSystem(Scene* scene,
                              ks::gui::Application* app) :
-        m_scene(scene)
+        m_scene(scene),
+        m_app(app)
     {
         // Get the InputData mask
         m_inputable_mask =
@@ -181,19 +476,7 @@ namespace raintk
                     m_scene->template GetComponentList<InputData>());
 
         // Create the InputListener
-        m_input_listener =
-                ks::MakeObject<InputListener>(
-                    scene->GetEventLoop());
-
-        app->signal_mouse_input->Connect(
-                    m_input_listener,
-                    &InputListener::OnMouseInput,
-                    ks::ConnectionType::Direct);
-
-        app->signal_touch_input->Connect(
-                    m_input_listener,
-                    &InputListener::OnTouchInput,
-                    ks::ConnectionType::Direct);
+        m_input_listener = ks::MakeObject<InputListener>(app);
     }
 
     InputSystem::~InputSystem()
@@ -209,6 +492,9 @@ namespace raintk
     void InputSystem::Update(TimePoint const &prev_upd_time,
                              TimePoint const &curr_upd_time)
     {
+//        rtklog.Trace() << "INPUTSYSTEMUPDATE: " <<
+//                          ks::CalcDuration<Milliseconds>(prev_upd_time,curr_upd_time).count();
+
         auto& list_entities = m_scene->GetEntityList();
         auto& list_input_data = m_cmlist_input_data->GetSparseList();
 
@@ -238,7 +524,7 @@ namespace raintk
             }
         }
 
-        // Sort the InputAreas by height // TODO rename height --> depth!
+        // Sort the InputAreas by depth
         std::sort(
                     m_list_input_areas_by_depth.begin(),
                     m_list_input_areas_by_depth.end(),
@@ -247,36 +533,15 @@ namespace raintk
                         return(a.first > b.first);
                     });
 
-        // Resample input times
-        m_input_listener->ResampleInputs(
+        if(m_input_recorder)
+        {
+            m_input_recorder->Update(curr_upd_time);
+        }
+
+        // Get Input points
+        auto list_points =
+                m_input_listener->GetInputs(
                     prev_upd_time,curr_upd_time);
-
-        auto& list_points = m_input_listener->list_points;
-
-        // NOTE (start)
-        // We initially repeated inputs that were previously
-        // pressed but hadn't been released to be able to
-        // detect input speed continuously. This is currently
-        // disabled and current widgets will probably break
-        // if its reenabled (ie ScrollArea)
-
-//        // If list_points is empty, fill it with any inputs
-//        // that were previously pressed but haven't yet been
-//        // released
-
-//        if(list_points.empty())
-//        {
-//            for(auto& pressed_point : m_input_listener->list_lk_pressed_by_type)
-//            {
-//                if(pressed_point.first)
-//                {
-//                    list_points.push_back(pressed_point.second);
-//                    list_points.back().timestamp = curr_upd_time;
-//                }
-//            }
-//        }
-
-        // NOTE (end)
 
         while(list_points.empty()==false)
         {
@@ -339,5 +604,19 @@ namespace raintk
     InputSystem::GetInputAreasByDepth() const
     {
         return m_list_input_areas_by_depth;
+    }
+
+    void InputSystem::StartInputRecording(std::string const &file_name)
+    {
+        m_input_recorder = nullptr;
+
+        m_input_recorder =
+                ks::MakeObject<InputRecorder>(
+                    m_app,file_name);
+    }
+
+    void InputSystem::StopInputRecording()
+    {
+        m_input_recorder = nullptr;
     }
 }

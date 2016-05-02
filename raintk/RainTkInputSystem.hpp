@@ -31,6 +31,7 @@ namespace ks
 namespace raintk
 {
     class Scene;
+    class InputRecorder;
     class InputListener;
 
     class InputSystem : public ks::draw::System
@@ -55,13 +56,16 @@ namespace raintk
         std::vector<std::pair<float,InputArea*>> const &
         GetInputAreasByDepth() const;
 
-        //
+        void StartInputRecording(std::string const &file_name);
+        void StopInputRecording();
 
     private:
         Scene* const m_scene;
+        ks::gui::Application* const m_app;
         uint m_inputable_mask;
         InputDataComponentList* m_cmlist_input_data;
 
+        shared_ptr<InputRecorder> m_input_recorder;
         shared_ptr<InputListener> m_input_listener;
 
         std::vector<std::pair<float,InputArea*>> m_list_input_areas_by_depth;
