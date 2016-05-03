@@ -18,7 +18,9 @@
 
 #include <raintk/RainTkInputSystem.hpp>
 #include <raintk/RainTkScene.hpp>
+#include <raintk/RainTkInputRecorder.hpp>
 #include <raintk/RainTkInputListener.hpp>
+#include <raintk/RainTkAnimation.hpp>
 #include <raintk/RainTkLog.hpp>
 
 namespace raintk
@@ -28,128 +30,154 @@ namespace raintk
 
     using InputType = InputArea::Point::Type;
 
-    namespace
-    {
-        InputArea::Point ConvertToInputPoint(ks::gui::MouseEvent const &mouse_event)
-        {
-            InputArea::Point mouse_point {
-                InputArea::Point::Type::Mouse,
-                static_cast<InputArea::Point::Button>(mouse_event.button),
-                static_cast<InputArea::Point::Action>(mouse_event.action),
-                px(mouse_event.x),
-                px(mouse_event.y),
-                mouse_event.timestamp
-            };
-
-            return mouse_point;
-        }
-
-        InputArea::Point ConvertToInputPoint(ks::gui::TouchEvent const &touch_event)
-        {
-            InputArea::Point touch_point{
-                // Type=0 is Mouse, Type=1 is Touch0, etc
-                static_cast<InputArea::Point::Type>(touch_event.index+1),
-                InputArea::Point::Button::None,
-                static_cast<InputArea::Point::Action>(touch_event.action),
-                px(touch_event.x),
-                px(touch_event.y),
-                touch_event.timestamp
-            };
-
-            return touch_point;
-        }
-    }
-
-    // ============================================================= //
-    // ============================================================= //
-
-    class InputRecorder : public ks::Object
+    class InputReplay : public raintk::Animation
     {
     public:
-        using base_type = ks::Object;
+        using base_type = raintk::Animation;
 
-        InputRecorder(ks::Object::Key const &key,
-                      ks::gui::Application* app,
-                      std::string const &file_path) :
-            ks::Object(key,app->GetEventLoop()),
-            m_app(app),
-            m_file(file_path,std::ios_base::out | std::ios_base::trunc)
-        {}
-
-        void Init(ks::Object::Key const &,
-                  shared_ptr<InputRecorder> const &this_recorder)
+        InputReplay(ks::Object::Key const &key,
+                    Scene* scene,
+                    std::string const &input_file_path) :
+            raintk::Animation(key,scene)
         {
-            // Setup connections
-            m_cid_mouse_events =
-                    m_app->signal_mouse_input->Connect(
-                        this_recorder,
-                        &InputRecorder::onMouseEvent,
-                        ks::ConnectionType::Direct);
+            std::ifstream input_file(input_file_path);
 
-            m_cid_touch_events =
-                    m_app->signal_touch_input->Connect(
-                        this_recorder,
-                        &InputRecorder::onTouchEvent,
-                        ks::ConnectionType::Direct);
+            // Parse input file
+            std::string line;
+            while(std::getline(input_file,line))
+            {
+                std::string token;
+                std::istringstream iss(line);
+
+                // frame
+                std::getline(iss,token,',');
+                uint frame = StringToUInt(token);
+
+                // frame time
+                std::getline(iss,token,',');
+                m_frame_times_by_frame.emplace(
+                            frame,
+                            TimePoint(Milliseconds(StringToUInt(token))));
+
+                InputArea::Point p;
+
+                // timestamp
+                std::getline(iss,token,',');
+                p.timestamp = TimePoint(Milliseconds(StringToUInt(token)));
+
+                // type
+                token.clear();
+                std::getline(iss,token,',');
+                p.type = static_cast<InputArea::Point::Type>(StringToUInt(token));
+
+                // button
+                token.clear();
+                std::getline(iss,token,',');
+                p.button = static_cast<InputArea::Point::Button>(StringToUInt(token));
+
+                // action
+                token.clear();
+                std::getline(iss,token,',');
+                p.action = static_cast<InputArea::Point::Action>(StringToUInt(token));
+
+                // x
+                token.clear();
+                std::getline(iss,token,',');
+                p.x = StringToFloat(token);
+
+                // y
+                token.clear();
+                std::getline(iss,token,',');
+                p.y = StringToFloat(token);
+
+                m_inputs_by_frame.emplace(frame,p);
+            }
+
+            // Fill in frame times
+            uint start_frame = m_inputs_by_frame.begin()->first;
+            uint last_frame = m_inputs_by_frame.rbegin()->first;
+
+            TimePoint prev_time = m_frame_times_by_frame.begin()->second;
+
+            for(uint f=start_frame+1; f <= last_frame; f++)
+            {
+                if(m_frame_times_by_frame.count(f) == 0)
+                {
+                    m_frame_times_by_frame.emplace(f,prev_time+Milliseconds(16));
+                }
+                else
+                {
+                    prev_time = m_frame_times_by_frame[f];
+                }
+            }
+
+            m_start_frame = m_inputs_by_frame.begin()->first;
+            m_last_frame = m_inputs_by_frame.rbegin()->first;
         }
 
-        ~InputRecorder()
+        void Init(ks::Object::Key const &,
+                  shared_ptr<InputReplay> const &)
         {}
 
-        void Update(TimePoint const &curr_upd_time)
+        ~InputReplay()
+        {}
+
+        void start() override
         {
+            m_frame = m_start_frame;
+        }
+
+        bool update(float) override
+        {
+            m_list_points.clear();
+
+            auto it_range = m_inputs_by_frame.equal_range(m_frame);
+            for(auto it = it_range.first; it != it_range.second; ++it)
+            {
+                m_list_points.push_back(it->second);
+            }
+
             m_frame++;
-            m_frame_time = curr_upd_time;
+            if(m_frame > m_last_frame)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        void complete() override
+        {}
+
+        std::vector<InputArea::Point> GetPoints()
+        {
+            return m_list_points;
+        }
+
+        static u64 StringToUInt(std::string const &s)
+        {
+            u64 i=0;
+            std::stringstream ss(s);
+            ss >> i;
+            return i;
+        }
+
+        static float StringToFloat(std::string const &s)
+        {
+            float f = 0;
+            std::stringstream ss(s);
+            ss >> f;
+            return f;
         }
 
     private:
-        void onMouseEvent(ks::gui::MouseEvent mouse_event)
-        {
-            recordInput(ConvertToInputPoint(mouse_event));
-        }
+        std::multimap<uint,InputArea::Point> m_inputs_by_frame;
+        std::map<uint,TimePoint> m_frame_times_by_frame;
 
-        void onTouchEvent(ks::gui::TouchEvent touch_event)
-        {
-            // We don't currently support more than 3 touch inputs
-            if(touch_event.index > 2)
-            {
-                return;
-            }
-
-            recordInput(ConvertToInputPoint(touch_event));
-        }
-
-        void recordInput(InputArea::Point const &point)
-        {
-            // Format is
-            // frame,frame_time,timestamp,type,button,action,x,y\n
-
-            std::string line;
-            line += ks::ToString(m_frame) + ",";
-            line += ks::ToString(
-                        static_cast<u64>(
-                            std::chrono::duration_cast<Milliseconds>(
-                                m_frame_time.time_since_epoch()).count())) + ",";
-            line += ks::ToString(
-                        static_cast<u64>(
-                            std::chrono::duration_cast<Milliseconds>(
-                                point.timestamp.time_since_epoch()).count())) + ",";
-            line += ks::ToString(static_cast<uint>(point.type)) + ",";
-            line += ks::ToString(static_cast<uint>(point.button)) + ",";
-            line += ks::ToString(static_cast<uint>(point.action)) + ",";
-            line += ks::ToString(static_cast<float>(point.x)) + ",";
-            line += ks::ToString(static_cast<float>(point.y)) + "\n";
-
-            rtklog.Trace() << line;
-            m_file << line;
-        }
-
-        ks::gui::Application* m_app;
         uint m_frame{0};
-        TimePoint m_frame_time;
-        std::ofstream m_file;
-        Id m_cid_mouse_events{0};
-        Id m_cid_touch_events{0};
+        uint m_start_frame;
+        uint m_last_frame;
+        std::vector<InputArea::Point> m_list_points;
     };
 
     // ============================================================= //
@@ -237,6 +265,12 @@ namespace raintk
                 m_input_listener->GetInputs(
                     prev_upd_time,curr_upd_time);
 
+        if(m_input_replay)
+        {
+            // Overwrite points with replay data
+            list_points = m_input_replay->GetPoints();
+        }
+
         while(list_points.empty()==false)
         {
             for(uint i=0; i < m_list_input_areas_by_depth.size();)
@@ -306,11 +340,30 @@ namespace raintk
 
         m_input_recorder =
                 ks::MakeObject<InputRecorder>(
-                    m_app,file_name);
+                    m_app,file_name,18000); // 5 min
     }
 
     void InputSystem::StopInputRecording()
     {
         m_input_recorder = nullptr;
     }
+
+    void InputSystem::StartInputPlayback(std::string const &file_name)
+    {
+        m_input_replay = nullptr;
+
+        m_input_replay =
+                ks::MakeObject<InputReplay>(
+                    m_scene,file_name);
+
+        m_input_replay->Start();
+    }
+
+    void InputSystem::StopInputPlayback()
+    {
+        m_input_replay = nullptr;
+    }
+
+    // ============================================================= //
+    // ============================================================= //
 }

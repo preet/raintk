@@ -33,6 +33,7 @@ namespace raintk
     class Scene;
     class InputRecorder;
     class InputListener;
+    class InputReplay;
 
     class InputSystem : public ks::draw::System
     {
@@ -59,6 +60,9 @@ namespace raintk
         void StartInputRecording(std::string const &file_name);
         void StopInputRecording();
 
+        void StartInputPlayback(std::string const &file_name);
+        void StopInputPlayback();
+
     private:
         Scene* const m_scene;
         ks::gui::Application* const m_app;
@@ -67,6 +71,7 @@ namespace raintk
 
         shared_ptr<InputRecorder> m_input_recorder;
         shared_ptr<InputListener> m_input_listener;
+        shared_ptr<InputReplay> m_input_replay;
 
         std::vector<std::pair<float,InputArea*>> m_list_input_areas_by_depth;
     };
