@@ -378,16 +378,20 @@ namespace raintk
 
                     // If the velocity exceeds a certain threshold,
                     // create a scrolling animation
-                    // TODO if(...)
-                    m_flick_anim =
-                            ks::MakeObject<ScrollFlickAnimation>(
-                                m_scene,
-                                [this](glm::vec2 const &v){ requestContentPositionChange(v); },
-                                glm::normalize(flick_velocity),
-                                glm::length(flick_velocity),
-                                m_deceleration_m_s_2*-1.0f);
+                    // TODO Make threshold a modifiable property
+                    auto flick_v_length = glm::length(flick_velocity);
+                    if(flick_v_length > 0.05f)
+                    {
+                        m_flick_anim =
+                                ks::MakeObject<ScrollFlickAnimation>(
+                                    m_scene,
+                                    [this](glm::vec2 const &v){ requestContentPositionChange(v); },
+                                    glm::normalize(flick_velocity),
+                                    glm::length(flick_velocity),
+                                    m_deceleration_m_s_2*-1.0f);
 
-                    m_flick_anim->Start();
+                        m_flick_anim->Start();
+                    }
                 }
             }
         }
