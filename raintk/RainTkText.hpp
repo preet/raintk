@@ -75,8 +75,8 @@ namespace raintk
     class Text : public DrawableWidget
     {
     public:
-
-        uint k_max_line_width{std::numeric_limits<uint>::max()/2};
+        static uint const k_max_line_width{
+            std::numeric_limits<uint>::max()/2};
 
         enum class Alignment : u8
         {
