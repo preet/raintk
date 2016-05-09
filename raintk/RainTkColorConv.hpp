@@ -41,6 +41,8 @@ namespace raintk
         // R,G,B from left to right for every two chars
         // ex: #0A0B0C: R=10, G=11, B=12
         glm::u8vec3 ConvHexToVec3(std::string const &hex_str);
+
+        glm::u8vec4 ConvHexToVec4(std::string const &hex_str);
     }
 
     // =========================================================== //
