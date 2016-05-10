@@ -31,15 +31,15 @@ namespace raintk
         namespace
         {
             void EnforceParentOrSibling(
-                    shared_ptr<Widget> const &widget,
-                    shared_ptr<Widget> const &anchor)
+                    Widget* widget,
+                    Widget* anchor)
             {
                 bool sibling =
                         (widget != anchor) &&
                         (widget->GetParent() == anchor->GetParent());
 
                 bool parent =
-                        (widget->GetParent() == anchor);
+                        (widget->GetParent().get() == anchor);
 
                 if(!(sibling || parent))
                 {
@@ -53,11 +53,11 @@ namespace raintk
         // =========================================================== //
 
         void AssignCenterToAnchorCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->x = 0.5f*(anchor->width.Get() - widget->width.Get());
                 widget->y = 0.5f*(anchor->height.Get() - widget->height.Get());
@@ -71,11 +71,11 @@ namespace raintk
 
         // Horizontal
         void AssignHCenterToAnchorHCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->x = 0.5f*(anchor->width.Get() - widget->width.Get());
             }
@@ -86,11 +86,11 @@ namespace raintk
         }
 
         void AssignRightToAnchorLeft(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->x = -1.0f*widget->width.Get();
             }
@@ -101,11 +101,11 @@ namespace raintk
         }
 
         void AssignLeftToAnchorLeft(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->x = 0.0f;
             }
@@ -116,11 +116,11 @@ namespace raintk
         }
 
         void AssignLeftToAnchorRight(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->x = anchor->width.Get();
             }
@@ -131,11 +131,11 @@ namespace raintk
         }
 
         void AssignRightToAnchorRight(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->x = anchor->width.Get() - widget->width.Get();
             }
@@ -147,11 +147,11 @@ namespace raintk
 
         // Vertical
         void AssignVCenterToAnchorVCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->y = 0.5f*(anchor->height.Get() - widget->height.Get());
             }
@@ -162,11 +162,11 @@ namespace raintk
         }
 
         void AssignBottomToAnchorTop(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->y = 0.0f - widget->height.Get();
             }
@@ -177,11 +177,11 @@ namespace raintk
         }
 
         void AssignTopToAnchorTop(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->y = 0.0f;
             }
@@ -192,11 +192,11 @@ namespace raintk
         }
 
         void AssignBottomToAnchorBottom(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->y = anchor->height.Get() - widget->height.Get();
             }
@@ -207,11 +207,11 @@ namespace raintk
         }
 
         void AssignTopToAnchorBottom(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->y = anchor->height.Get();
             }
@@ -224,135 +224,135 @@ namespace raintk
         // =========================================================== //
 
         void BindCenterToAnchorCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
-                widget->x = [&](){ return (0.5f*(anchor->width.Get() - widget->width.Get())); };
-                widget->y = [&](){ return (0.5f*(anchor->height.Get() - widget->height.Get())); };
+                widget->x = [widget,anchor](){ return (0.5f*(anchor->width.Get() - widget->width.Get())); };
+                widget->y = [widget,anchor](){ return (0.5f*(anchor->height.Get() - widget->height.Get())); };
             }
             else
             {
-                widget->x = [&](){ return (anchor->x.Get() + 0.5f*(anchor->width.Get() - widget->width.Get())); };
-                widget->y = [&](){ return (anchor->y.Get() + 0.5f*(anchor->height.Get() - widget->height.Get())); };
+                widget->x = [widget,anchor](){ return (anchor->x.Get() + 0.5f*(anchor->width.Get() - widget->width.Get())); };
+                widget->y = [widget,anchor](){ return (anchor->y.Get() + 0.5f*(anchor->height.Get() - widget->height.Get())); };
             }
         }
 
         // Horizontal
         void BindHCenterToAnchorHCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
-                [&](){ return (widget->x = 0.5f*(anchor->width.Get() - widget->width.Get())); };
+                [widget,anchor](){ return (widget->x = 0.5f*(anchor->width.Get() - widget->width.Get())); };
             }
             else
             {
-                [&](){ return (widget->x = anchor->x.Get() + 0.5f*(anchor->width.Get() - widget->width.Get())); };
+                [widget,anchor](){ return (widget->x = anchor->x.Get() + 0.5f*(anchor->width.Get() - widget->width.Get())); };
             }
         }
 
         void BindRightToAnchorLeft(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
-                widget->x = [&](){ return -1.0f*widget->width.Get(); };
+                widget->x = [widget,anchor](){ return -1.0f*widget->width.Get(); };
             }
             else
             {
-                widget->x = [&](){ return (anchor->x.Get() - widget->width.Get()); };
+                widget->x = [widget,anchor](){ return (anchor->x.Get() - widget->width.Get()); };
             }
         }
 
         void BindLeftToAnchorLeft(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
-                widget->x = [&](){ return 0.0f; };
+                widget->x = [widget,anchor](){ return 0.0f; };
             }
             else
             {
-                widget->x = [&](){ return anchor->x.Get(); };
+                widget->x = [widget,anchor](){ return anchor->x.Get(); };
             }
         }
 
         void BindLeftToAnchorRight(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
-                widget->x = [&](){ return anchor->width.Get(); };
+                widget->x = [widget,anchor](){ return anchor->width.Get(); };
             }
             else
             {
-                widget->x = [&](){ return (anchor->x.Get() + anchor->width.Get()); };
+                widget->x = [widget,anchor](){ return (anchor->x.Get() + anchor->width.Get()); };
             }
         }
 
         void BindRightToAnchorRight(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
-                widget->x = [&](){ return (anchor->width.Get() - widget->width.Get()); };
+                widget->x = [widget,anchor](){ return (anchor->width.Get() - widget->width.Get()); };
             }
             else
             {
-                widget->x = [&](){ return (anchor->x.Get() + anchor->width.Get() - widget->width.Get()); };
+                widget->x = [widget,anchor](){ return (anchor->x.Get() + anchor->width.Get() - widget->width.Get()); };
             }
         }
 
         // Vertical
         void BindVCenterToAnchorVCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
-                widget->y = [&](){ return (0.5f*(anchor->height.Get() - widget->height.Get())); };
+                widget->y = [widget,anchor](){ return (0.5f*(anchor->height.Get() - widget->height.Get())); };
             }
             else
             {
-                widget->y = [&](){ return (anchor->y.Get() + 0.5f*(anchor->height.Get() - widget->height.Get())); };
+                widget->y = [widget,anchor](){ return (anchor->y.Get() + 0.5f*(anchor->height.Get() - widget->height.Get())); };
             }
         }
 
         void BindBottomToAnchorTop(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
-                widget->y = [&](){ return (0.0f - widget->height.Get()); };
+                widget->y = [widget,anchor](){ return (0.0f - widget->height.Get()); };
             }
             else
             {
-                widget->y = [&](){ return (anchor->y.Get() - widget->height.Get()); };
+                widget->y = [widget,anchor](){ return (anchor->y.Get() - widget->height.Get()); };
             }
         }
 
         void BindTopToAnchorTop(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->y = 0.0f;
             }
@@ -363,32 +363,32 @@ namespace raintk
         }
 
         void BindBottomToAnchorBottom(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
-                widget->y = [&](){ return (anchor->height.Get() - widget->height.Get()); };
+                widget->y = [widget,anchor](){ return (anchor->height.Get() - widget->height.Get()); };
             }
             else
             {
-                widget->y = [&](){ return (anchor->y.Get() + anchor->height.Get() - widget->height.Get()); };
+                widget->y = [widget,anchor](){ return (anchor->y.Get() + anchor->height.Get() - widget->height.Get()); };
             }
         }
 
         void BindTopToAnchorBottom(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor)
+                Widget* widget,
+                Widget* anchor)
         {
             EnforceParentOrSibling(widget,anchor);
-            if(anchor==widget->GetParent())
+            if(anchor==widget->GetParent().get())
             {
                 widget->y = anchor->height.Get();
             }
             else
             {
-                widget->y = [&](){ return (anchor->y.Get() + anchor->height.Get()); };
+                widget->y = [widget,anchor](){ return (anchor->y.Get() + anchor->height.Get()); };
             }
         }
     }

@@ -93,40 +93,40 @@ void TestAssignment(shared_ptr<Widget> &widget,
     ks::TimePoint t0,t1;
     widget->GetScene()->GetTransformSystem()->Update(t0,t1);
 
-    Align::AssignCenterToAnchorCenter(widget,anchor);
+    Align::AssignCenterToAnchorCenter(widget.get(),anchor.get());
     assert(GetWorldHCenter(widget)==25);
     assert(GetWorldVCenter(widget)==40);
 
 
-    Align::AssignHCenterToAnchorHCenter(widget,anchor);
+    Align::AssignHCenterToAnchorHCenter(widget.get(),anchor.get());
     assert(GetWorldHCenter(widget)==25);
 
-    Align::AssignRightToAnchorLeft(widget,anchor);
+    Align::AssignRightToAnchorLeft(widget.get(),anchor.get());
     assert(GetRight(widget)==10);
 
-    Align::AssignLeftToAnchorLeft(widget,anchor);
+    Align::AssignLeftToAnchorLeft(widget.get(),anchor.get());
     assert(GetLeft(widget)==10);
 
-    Align::AssignLeftToAnchorRight(widget,anchor);
+    Align::AssignLeftToAnchorRight(widget.get(),anchor.get());
     assert(GetLeft(widget)==40);
 
-    Align::AssignRightToAnchorRight(widget,anchor);
+    Align::AssignRightToAnchorRight(widget.get(),anchor.get());
     assert(GetRight(widget)==40);
 
 
-    Align::AssignVCenterToAnchorVCenter(widget,anchor);
+    Align::AssignVCenterToAnchorVCenter(widget.get(),anchor.get());
     assert(GetWorldVCenter(widget)==40);
 
-    Align::AssignBottomToAnchorTop(widget,anchor);
+    Align::AssignBottomToAnchorTop(widget.get(),anchor.get());
     assert(GetBottom(widget)==20);
 
-    Align::AssignTopToAnchorTop(widget,anchor);
+    Align::AssignTopToAnchorTop(widget.get(),anchor.get());
     assert(GetTop(widget)==20);
 
-    Align::AssignBottomToAnchorBottom(widget,anchor);
+    Align::AssignBottomToAnchorBottom(widget.get(),anchor.get());
     assert(GetBottom(widget)==60);
 
-    Align::AssignTopToAnchorBottom(widget,anchor);
+    Align::AssignTopToAnchorBottom(widget.get(),anchor.get());
     assert(GetTop(widget)==60);
 }
 
@@ -146,40 +146,40 @@ void TestBinding(shared_ptr<Widget> &widget,
     ks::TimePoint t0,t1;
     widget->GetScene()->GetTransformSystem()->Update(t0,t1);
 
-    Align::BindCenterToAnchorCenter(widget,anchor);
+    Align::BindCenterToAnchorCenter(widget.get(),anchor.get());
     assert(GetWorldHCenter(widget)==25);
     assert(GetWorldVCenter(widget)==40);
 
 
-    Align::BindHCenterToAnchorHCenter(widget,anchor);
+    Align::BindHCenterToAnchorHCenter(widget.get(),anchor.get());
     assert(GetWorldHCenter(widget)==25);
 
-    Align::BindRightToAnchorLeft(widget,anchor);
+    Align::BindRightToAnchorLeft(widget.get(),anchor.get());
     assert(GetRight(widget)==10);
 
-    Align::BindLeftToAnchorLeft(widget,anchor);
+    Align::BindLeftToAnchorLeft(widget.get(),anchor.get());
     assert(GetLeft(widget)==10);
 
-    Align::BindLeftToAnchorRight(widget,anchor);
+    Align::BindLeftToAnchorRight(widget.get(),anchor.get());
     assert(GetLeft(widget)==40);
 
-    Align::BindRightToAnchorRight(widget,anchor);
+    Align::BindRightToAnchorRight(widget.get(),anchor.get());
     assert(GetRight(widget)==40);
 
 
-    Align::BindVCenterToAnchorVCenter(widget,anchor);
+    Align::BindVCenterToAnchorVCenter(widget.get(),anchor.get());
     assert(GetWorldVCenter(widget)==40);
 
-    Align::BindBottomToAnchorTop(widget,anchor);
+    Align::BindBottomToAnchorTop(widget.get(),anchor.get());
     assert(GetBottom(widget)==20);
 
-    Align::BindTopToAnchorTop(widget,anchor);
+    Align::BindTopToAnchorTop(widget.get(),anchor.get());
     assert(GetTop(widget)==20);
 
-    Align::BindBottomToAnchorBottom(widget,anchor);
+    Align::BindBottomToAnchorBottom(widget.get(),anchor.get());
     assert(GetBottom(widget)==60);
 
-    Align::BindTopToAnchorBottom(widget,anchor);
+    Align::BindTopToAnchorBottom(widget.get(),anchor.get());
     assert(GetTop(widget)==60);
 }
 

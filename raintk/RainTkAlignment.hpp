@@ -39,99 +39,99 @@ namespace raintk
         // Assignments
 
         void AssignCenterToAnchorCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         // Horizontal
         void AssignHCenterToAnchorHCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void AssignRightToAnchorLeft(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void AssignLeftToAnchorLeft(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void AssignLeftToAnchorRight(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void AssignRightToAnchorRight(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         // Vertical
         void AssignVCenterToAnchorVCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void AssignBottomToAnchorTop(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void AssignTopToAnchorTop(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void AssignBottomToAnchorBottom(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void AssignTopToAnchorBottom(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
 
         // Bindings
 
         void BindCenterToAnchorCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         // Horizontal
         void BindHCenterToAnchorHCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void BindRightToAnchorLeft(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void BindLeftToAnchorLeft(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void BindLeftToAnchorRight(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void BindRightToAnchorRight(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         // Vertical
         void BindVCenterToAnchorVCenter(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void BindBottomToAnchorTop(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void BindTopToAnchorTop(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void BindBottomToAnchorBottom(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
 
         void BindTopToAnchorBottom(
-                shared_ptr<Widget> const &widget,
-                shared_ptr<Widget> const &anchor);
+                Widget* widget,
+                Widget* anchor);
     }
 
     // =========================================================== //
