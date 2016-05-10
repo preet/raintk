@@ -104,6 +104,7 @@ namespace raintk
     {
         uint count = 0;
         float bottom = 0;
+        float col_width = 0;
         float spacing_val = spacing.Get();
 
         for(auto& item : m_list_items)
@@ -112,6 +113,10 @@ namespace raintk
 
             count++;
             bottom += item.widget->height.Get();
+            col_width = std::max(item.widget->height.Get(),col_width);
         }
+
+        this->width = col_width;
+        this->height = bottom-spacing_val;
     }
 }
