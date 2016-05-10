@@ -248,11 +248,11 @@ namespace raintk
             EnforceParentOrSibling(widget,anchor);
             if(anchor==widget->GetParent().get())
             {
-                [widget,anchor](){ return (widget->x = 0.5f*(anchor->width.Get() - widget->width.Get())); };
+                widget->x = [widget,anchor](){ return (0.5f*(anchor->width.Get() - widget->width.Get())); };
             }
             else
             {
-                [widget,anchor](){ return (widget->x = anchor->x.Get() + 0.5f*(anchor->width.Get() - widget->width.Get())); };
+                widget->x = [widget,anchor](){ return (anchor->x.Get() + 0.5f*(anchor->width.Get() - widget->width.Get())); };
             }
         }
 
