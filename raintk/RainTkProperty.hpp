@@ -33,6 +33,11 @@ namespace raintk
         // and hiding the one we want to call
         using ks::DynamicProperty<T>::operator=;
 
+        DynamicPropertyPushNotify()
+        {
+            this->setupNotifier();
+        }
+
         DynamicPropertyPushNotify(T value) :
             ks::DynamicProperty<T>(std::move(value))
         {
@@ -65,6 +70,11 @@ namespace raintk
     {
     public:
         using ks::DynamicProperty<T>::operator=;
+
+        DynamicPropertyPullNotify()
+        {
+            this->setupNotifier();
+        }
 
         DynamicPropertyPullNotify(T value) :
             ks::DynamicProperty<T>(std::move(value))
