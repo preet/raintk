@@ -74,6 +74,7 @@ HEADERS += \
     $${PATH_RAINTK}/raintk/RainTkPropertyAnimation.hpp \
     $${PATH_RAINTK}/raintk/RainTkMainDrawStage.hpp \
     $${PATH_RAINTK}/raintk/RainTkInputListener.hpp \
+    $${PATH_RAINTK}/raintk/RainTkInputRecorder.hpp \
     $${PATH_RAINTK}/raintk/RainTkInputSystem.hpp \
     $${PATH_RAINTK}/raintk/RainTkAnimationSystem.hpp \
     $${PATH_RAINTK}/raintk/RainTkTransformSystem.hpp \
@@ -89,6 +90,7 @@ SOURCES += \
     $${PATH_RAINTK}/raintk/RainTkLog.cpp \
     $${PATH_RAINTK}/raintk/RainTkMainDrawStage.cpp \
     $${PATH_RAINTK}/raintk/RainTkInputListener.cpp \
+    $${PATH_RAINTK}/raintk/RainTkInputRecorder.cpp \
     $${PATH_RAINTK}/raintk/RainTkInputSystem.cpp \
     $${PATH_RAINTK}/raintk/RainTkAnimationSystem.cpp \
     $${PATH_RAINTK}/raintk/RainTkTransformSystem.cpp \
@@ -106,10 +108,14 @@ SOURCES += \
 
 # helpers
 HEADERS += \
-    $${PATH_RAINTK}/raintk/RainTkAlignment.hpp
+    $${PATH_RAINTK}/raintk/RainTkAlignment.hpp \
+    $${PATH_RAINTK}/raintk/RainTkColorConv.hpp \
+    $${PATH_RAINTK}/raintk/RainTkImageAtlas.hpp
 
 SOURCES += \
-    $${PATH_RAINTK}/raintk/RainTkAlignment.cpp
+    $${PATH_RAINTK}/raintk/RainTkAlignment.cpp \
+    $${PATH_RAINTK}/raintk/RainTkColorConv.cpp \
+    $${PATH_RAINTK}/raintk/RainTkImageAtlas.cpp
 
 
 # widget
@@ -124,12 +130,14 @@ HEADERS += \
     $${PATH_RAINTK}/raintk/RainTkDrawableWidget.hpp \
     $${PATH_RAINTK}/raintk/RainTkRectangle.hpp \
     $${PATH_RAINTK}/raintk/RainTkImage.hpp \
+    $${PATH_RAINTK}/raintk/RainTkAtlasImage.hpp \
     $${PATH_RAINTK}/raintk/RainTkText.hpp
 
 SOURCES += \
     $${PATH_RAINTK}/raintk/RainTkDrawableWidget.cpp \
     $${PATH_RAINTK}/raintk/RainTkRectangle.cpp \
     $${PATH_RAINTK}/raintk/RainTkImage.cpp \
+    $${PATH_RAINTK}/raintk/RainTkAtlasImage.cpp \
     $${PATH_RAINTK}/raintk/RainTkText.cpp
 
 # widgets (inputs)
@@ -195,6 +203,10 @@ SOURCES += \
 #    $${PATH_RAINTK}/raintk/test/RainTkTestUpdateHierarchy.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestAlignment.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestListView.cpp
+#    $${PATH_RAINTK}/raintk/test/RainTkTestDrag.cpp
+#    $${PATH_RAINTK}/raintk/test/RainTkTestInputResampling.cpp
+#    $${PATH_RAINTK}/raintk/test/RainTkTestInputReply.cpp
+    $${PATH_RAINTK}/raintk/test/RainTkTestImageAtlas.cpp
 
 
 
