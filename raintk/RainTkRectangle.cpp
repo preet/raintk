@@ -183,7 +183,7 @@ namespace raintk
         list_vx->clear();
         list_vx->reserve(6*sizeof(Vertex));
 
-        auto const o = opacity.Get();
+        auto const o = draw_data.opacity;
         glm::u8vec4 rgba = color.Get();
 
         float final_opacity = (o*rgba.a)/255.0f;

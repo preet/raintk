@@ -103,7 +103,8 @@ namespace raintk
         m_upd_xf(false),
         m_upd_texture(false),
         m_upd_tile_ratio(false),
-        m_upd_smooth(false)
+        m_upd_smooth(false),
+        m_upd_opacity(false)
     {
         // Set a default initial source
         source = g_default_image_source;
@@ -168,11 +169,10 @@ namespace raintk
 
     void Image::onOpacityChanged()
     {
-        auto u_f_opacity =
-                static_cast<ks::gl::Uniform<float>*>(
-                    m_uniform_set->list_uniforms[2].get());
+        m_upd_opacity = true;
 
-        u_f_opacity->Update(opacity.Get());
+        m_cmlist_update_data->GetComponent(m_entity_id).
+                update |= UpdateData::UpdateDrawables;
     }
 
     void Image::onSourceChanged()
@@ -316,6 +316,10 @@ namespace raintk
         {
             updateSmooth();
         }
+        if(m_upd_opacity)
+        {
+            updateOpacity();
+        }
 
         m_upd_recreate = false;
         m_upd_geometry = false;
@@ -323,6 +327,7 @@ namespace raintk
         m_upd_texture = false;
         m_upd_tile_ratio = false;
         m_upd_smooth = false;
+        m_upd_opacity = false;
     }
 
     void Image::updateGeometry()
@@ -474,6 +479,17 @@ namespace raintk
                     ks::gl::Texture2D::Filter::Nearest;
 
         texture->SetFilterModes(filter,filter);
+    }
+
+    void Image::updateOpacity()
+    {
+        auto& draw_data = m_cmlist_draw_data->GetComponent(m_entity_id);
+
+        auto u_f_opacity =
+                static_cast<ks::gl::Uniform<float>*>(
+                    m_uniform_set->list_uniforms[2].get());
+
+        u_f_opacity->Update(draw_data.opacity);
     }
 
     void Image::setupTypeInit(Scene* scene)

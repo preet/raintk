@@ -179,6 +179,7 @@ namespace raintk
         DrawKey key;
         UPtrBuffer vx_buffer;
         bool visible;
+        float opacity; // final accumulated opacity
     };
 
     using DrawDataComponentList =

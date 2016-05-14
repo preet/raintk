@@ -620,12 +620,14 @@ namespace raintk
 
     void Text::updateColorUniforms()
     {
+        auto const &draw_data = m_cmlist_draw_data->GetComponent(m_entity_id);
+
         for(auto &batch : m_list_glyph_batches)
         {
             auto const &this_color = color.Get();
 
             float const k_to_fp = 1.0f/255.0f;
-            float const final_opacity = (this_color.a*k_to_fp)*opacity.Get();
+            float const final_opacity = (this_color.a*k_to_fp)*draw_data.opacity;
             glm::vec4 const color_norm(
                         this_color.r*k_to_fp*final_opacity,
                         this_color.g*k_to_fp*final_opacity,

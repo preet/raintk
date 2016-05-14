@@ -178,7 +178,7 @@ namespace raintk
         auto const h = height.Get();
         float const z = 0.0f;
         float const n = 0.0f;
-        float const this_opacity = opacity.Get();
+        float const this_opacity = draw_data.opacity;
 
         auto const &xf = m_cmlist_xf_data->
                 GetComponent(m_entity_id).world_xf;

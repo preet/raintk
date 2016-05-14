@@ -24,7 +24,7 @@ namespace raintk
 {
     namespace draw_debug
     {
-        #include <raintk/shaders/color_attr_glsl.hpp>
+        #include <raintk/shaders/RainTkColorAttr.glsl.hpp>
 
         using AttrType = ks::gl::VertexBuffer::Attribute::Type;
 
@@ -267,6 +267,32 @@ namespace raintk
             if(has_clip)
             {
                 clip_stack.pop_back();
+            }
+        }
+
+        // * Opacities are part of the widget hierarchy
+        // * The final accumulated opacity of a widget is the
+        //   product of its own opacity with the opacity of all
+        //   the widget's ancestors
+        void AssignOpacities(std::vector<DrawData> &list_draw_data,
+                             Widget* widget,
+                             float opacity)
+        {
+            if(widget->GetIsDrawable())
+            {
+                DrawableWidget* drawable_widget =
+                        static_cast<DrawableWidget*>(
+                            widget);
+
+                opacity *= drawable_widget->opacity.Get();
+
+                auto& draw_data = list_draw_data[widget->GetEntityId()];
+                draw_data.opacity = opacity;
+            }
+
+            for(auto& child : widget->GetChildren())
+            {
+                AssignOpacities(list_draw_data,child.get(),opacity);
             }
         }
     }
@@ -523,6 +549,16 @@ namespace raintk
         }
 
 
+        auto& list_draw_data =
+                m_cmlist_draw_data->GetSparseList();
+
+
+        // Assign opacities
+        AssignOpacities(list_draw_data,
+                        m_scene->GetRootWidget().get(),
+                        1.0f);
+
+
         // Get the current list of entities with DrawData and store
         // them in lists separated by transparency / opaque
         auto &list_entities = m_scene->GetEntityList();
@@ -538,8 +574,6 @@ namespace raintk
         auto& list_upd_data =
                 m_cmlist_upd_data->GetSparseList();
 
-        auto& list_draw_data =
-                m_cmlist_draw_data->GetSparseList();
 
         std::vector<Id> list_opq_draw_data_ids;
         std::vector<Id> list_xpr_draw_data_ids;

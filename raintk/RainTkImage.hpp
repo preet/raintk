@@ -108,6 +108,7 @@ namespace raintk
         void updateTexture();
         void updateTileRatio();
         void updateSmooth();
+        void updateOpacity();
         static void setupTypeInit(Scene* scene);
 
         Id m_uniform_set_id;
@@ -124,6 +125,7 @@ namespace raintk
         bool m_upd_texture;
         bool m_upd_tile_ratio;
         bool m_upd_smooth;
+        bool m_upd_opacity;
     };
 }
 
