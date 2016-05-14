@@ -33,18 +33,18 @@ namespace {
     std::uniform_int_distribution<uint> dis(2,8); // [2,8] // float r = mm(0.5*(dis(mt)));
 
     // some colors
-    glm::u8vec3 g_color_yellow{242,209,91};
-    glm::u8vec3 g_color_green{91,191,33};
-    glm::u8vec3 g_color_blue{0,142,214};
-    glm::u8vec3 g_color_purple{170,71,186};
-    glm::u8vec3 g_color_red{239,53,45};
+    glm::u8vec4 g_color_yellow{242,209,91,255};
+    glm::u8vec4 g_color_green{91,191,33,255};
+    glm::u8vec4 g_color_blue{0,142,214,255};
+    glm::u8vec4 g_color_purple{170,71,186,255};
+    glm::u8vec4 g_color_red{239,53,45,255};
 }
 
 namespace raintk
 {
     struct TestItem
     {
-        glm::u8vec3 color;
+        glm::u8vec4 color;
     };
 
     class TestDelegate : public ListDelegate
@@ -64,7 +64,7 @@ namespace raintk
 
             m_text = MakeWidget<Text>(m_scene,m_rect);
             m_text->font = "FiraSansMinimal.ttf";
-            m_text->color = glm::u8vec3(255,255,255);
+            m_text->color = glm::u8vec4(255,255,255,255);
             m_text->z = m_rect->z.Get() + mm(1.0f);
             m_text->text = "Delegate";
             m_text->UpdateHierarchy(); // We need the final text height
@@ -102,7 +102,7 @@ namespace raintk
         void SetData(TestItem const &item)
         {
             m_color = item.color;
-            if(m_color == glm::u8vec3(0,0,0))
+            if(m_color == glm::u8vec4(0,0,0,255))
             {
                 auto new_height = m_rect->height.Get()*2;
                 m_rect->height = new_height;
@@ -118,7 +118,7 @@ namespace raintk
         shared_ptr<Rectangle> m_rect;
         shared_ptr<Text> m_text;
 
-        glm::u8vec3 m_color;
+        glm::u8vec4 m_color;
     };
 
     // =========================================================== //
@@ -1166,7 +1166,7 @@ namespace raintk
                 lgd.back()->height = mm(0.25f);
                 lgd.back()->y = mm(0.0f);
                 lgd.back()->z = mm(20.0f);
-                lgd.back()->color = glm::u8vec3{255,0,255};
+                lgd.back()->color = glm::u8vec4{255,0,255,255};
 
                 // bottom
                 lgd.push_back(
@@ -1179,7 +1179,7 @@ namespace raintk
                 lgd.back()->height = mm(0.25f);
                 lgd.back()->y = [this](){ return m_content_parent->height.Get()-mm(0.25f); };
                 lgd.back()->z = mm(20.0f);
-                lgd.back()->color = glm::u8vec3{255,0,255};
+                lgd.back()->color = glm::u8vec4{255,0,255,255};
 
                 rtklog.Trace() << "height: " << m_content_parent->height.Get();
             }
@@ -1229,7 +1229,7 @@ CreateButtonRow(shared_ptr<Widget> root,
 
                 auto button_text = MakeWidget<Text>(scene,button_rect);
                 button_text->text = button_name;
-                button_text->color = glm::u8vec3(255,255,255);
+                button_text->color = glm::u8vec4(255,255,255,255);
                 button_text->z = button_rect->z.Get() + mm(1.0f);
                 button_text->font = "FiraSansMinimal.ttf";
                 button_text->size = mm(5);
@@ -1279,7 +1279,7 @@ int main(int argc, char* argv[])
     auto list_model = make_shared<ListModelSTLVector<TestItem>>();
     for(uint i=0; i < 25; i++)
     {
-        list_model->PushBack(TestItem{glm::u8vec3{96,200,90}});
+        list_model->PushBack(TestItem{glm::u8vec4{96,200,90,255}});
     }
 
 
@@ -1289,7 +1289,7 @@ int main(int argc, char* argv[])
 
     std::vector<TestItem> list_add_insert{
 //        TestItem{glm::u8vec3{249,155,12}},
-        TestItem{glm::u8vec3{249,155,12}}
+        TestItem{glm::u8vec4{249,155,12,255}}
     };
 
     auto on_clicked_add_beg =
@@ -1341,7 +1341,7 @@ int main(int argc, char* argv[])
             [&](){
                 if(list_model->GetSize() >= 5)
                 {
-                    list_model->SetData(4,TestItem{glm::u8vec3(0,0,0)});
+                    list_model->SetData(4,TestItem{glm::u8vec4(0,0,0,255)});
                 }
             };
 
@@ -1391,7 +1391,7 @@ int main(int argc, char* argv[])
     list_view_bgbg->x = mm(10);
     list_view_bgbg->y = 0.5*(root->height.Get()-list_view_bgbg->height.Get());
     list_view_bgbg->z = mm(0.5);
-    list_view_bgbg->color = glm::u8vec3(30,60,60);
+    list_view_bgbg->color = glm::u8vec4(30,60,60,255);
 
 
     auto list_view_bg =
@@ -1403,7 +1403,7 @@ int main(int argc, char* argv[])
     list_view_bg->x = mm(10);
     list_view_bg->y = 0.5*(root->height.Get()-list_view_bg->height.Get());
     list_view_bg->z = 1.0;
-    list_view_bg->color = glm::u8vec3(60,60,60);
+    list_view_bg->color = glm::u8vec4(60,60,60,255);
 
 
     // ListView
@@ -1420,13 +1420,13 @@ int main(int argc, char* argv[])
 
     // Debug Lines
     auto line_top = MakeWidget<Rectangle>(scene,root);
-    line_top->color = glm::u8vec3(255,255,255);
+    line_top->color = glm::u8vec4(255,255,255,255);
     line_top->height = mm(0.5);
     line_top->width = root->width.Get();
     line_top->y = list_view_bg->y.Get();
 
     auto line_bottom = MakeWidget<Rectangle>(scene,root);
-    line_bottom->color = glm::u8vec3(255,255,255);
+    line_bottom->color = glm::u8vec4(255,255,255,255);
     line_bottom->height = mm(0.5);
     line_bottom->width = root->width.Get();
     line_bottom->y = list_view_bg->y.Get() + list_view_bg->height.Get();
@@ -1450,7 +1450,7 @@ int main(int argc, char* argv[])
             [&](){
                 return list_view->y.Get();
             };
-    scroll_track->color = glm::u8vec3{0,0,0};
+    scroll_track->color = glm::u8vec4{0,0,0,255};
 
     // Scrollbar grip
     auto scroll_grip =
@@ -1512,14 +1512,14 @@ int main(int argc, char* argv[])
     auto ctp_desc = MakeWidget<Text>(scene,root);
     ctp_desc->x = list_view_bgbg->x.Get() + list_view_bgbg->width.Get() + mm(10);
     ctp_desc->y = list_view_bgbg->y.Get() + mm(35);
-    ctp_desc->color = glm::u8vec3(255,255,255);
+    ctp_desc->color = glm::u8vec4(255,255,255,255);
     ctp_desc->text = "Content Parent";
     ctp_desc->font = "FiraSansMinimal.ttf";
 
     auto ctp_y = MakeWidget<Text>(scene,root);
     ctp_y->x = ctp_desc->x.Get();
     ctp_y->y = ctp_desc->y.Get() + mm(10);
-    ctp_y->color = glm::u8vec3(255,255,255);
+    ctp_y->color = glm::u8vec4(255,255,255,255);
     ctp_y->text = [&](){
         auto y = list_view->GetContentParent()->y.Get();
         return std::string("Y: ")+ks::ToString(y);
@@ -1529,7 +1529,7 @@ int main(int argc, char* argv[])
     auto ctp_h = MakeWidget<Text>(scene,root);
     ctp_h->x = ctp_desc->x.Get();
     ctp_h->y = ctp_y->y.Get() + mm(10);
-    ctp_h->color = glm::u8vec3(255,255,255);
+    ctp_h->color = glm::u8vec4(255,255,255,255);
     ctp_h->text = [&](){
         auto h = list_view->GetContentParent()->height.Get();
         return std::string("H: ")+ks::ToString(h);

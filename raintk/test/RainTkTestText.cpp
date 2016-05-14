@@ -32,8 +32,8 @@ int main(int argc, char* argv[])
     TestContext c;
 
     // Set colors
-    glm::u8vec3 color_bg{25,25,25};
-    glm::u8vec3 color_fg{228,228,228};
+    glm::u8vec4 color_bg{25,25,25,255};
+    glm::u8vec4 color_fg{228,228,228,255};
 
     auto scene = c.scene.get();
 
@@ -161,6 +161,7 @@ int main(int argc, char* argv[])
                     {
                         auto label = make_smaller_text();
                         label->text = ks::ToString(i)+". A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
+                        label->opacity = std::min(1.0f,i*0.05f + 0.1f);
                         list_right_column_text.push_back(label);
                     }
 

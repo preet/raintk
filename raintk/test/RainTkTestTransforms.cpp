@@ -49,13 +49,13 @@ int main(int argc, char* argv[])
     auto red = MakeWidget<Rectangle>(scene,lower_plane);
     red->x = (parent->width.Get() - red->width.Get())*0.5;
     red->height = parent->height.Get();
-    red->color = glm::vec3{255,0,0};
+    red->color = glm::vec4{255,0,0,255};
 
 
     auto blue = MakeWidget<Rectangle>(scene,upper_plane);
     blue->y = (parent->height.Get() - blue->height.Get())*0.5;
     blue->width = parent->width.Get();
-    blue->color = glm::vec3{0,0,255};
+    blue->color = glm::vec4{0,0,255,255};
 
 
     // Run!

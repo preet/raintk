@@ -31,12 +31,12 @@ namespace raintk
         struct Vertex
         {
             glm::vec4 a_v4_position; // 16
-            glm::vec2 a_v2_tex0; // 8
-        }; // sizeof == 24
+            glm::vec3 a_v3_tex0_opacity; // 8
+        }; // sizeof == 28
 
         ks::gl::VertexLayout const g_vx_layout {
             { "a_v4_position", AttrType::Float, 4, false },
-            { "a_v2_tex0", AttrType::Float, 2, false }
+            { "a_v3_tex0_opacity", AttrType::Float, 3, false }
         };
 
         shared_ptr<GeometryLayout> g_geometry_layout(
@@ -114,6 +114,14 @@ namespace raintk
                 update |= UpdateData::UpdateDrawables;
     }
 
+    void AtlasImage::onOpacityChanged()
+    {
+        m_upd_geometry = true;
+
+        m_cmlist_update_data->GetComponent(m_entity_id).
+                update |= UpdateData::UpdateDrawables;
+    }
+
     void AtlasImage::createDrawables()
     {
         // Destroy drawable resources if they already exist
@@ -170,6 +178,7 @@ namespace raintk
         auto const h = height.Get();
         float const z = 0.0f;
         float const n = 0.0f;
+        float const this_opacity = opacity.Get();
 
         auto const &xf = m_cmlist_xf_data->
                 GetComponent(m_entity_id).world_xf;
@@ -186,7 +195,7 @@ namespace raintk
                     *list_vx,
                     Vertex{
                         xf*glm::vec4(n,n,z,1),
-                        glm::vec2{image_desc.s0,image_desc.t0}
+                        glm::vec3{image_desc.s0,image_desc.t0,this_opacity}
                     });
 
         // tl
@@ -194,7 +203,7 @@ namespace raintk
                     *list_vx,
                     Vertex{
                         xf*glm::vec4(n,n,z,1),
-                        glm::vec2{image_desc.s0,image_desc.t0}
+                        glm::vec3{image_desc.s0,image_desc.t0,this_opacity}
                     });
 
         // bl
@@ -202,7 +211,7 @@ namespace raintk
                     *list_vx,
                     Vertex{
                         xf*glm::vec4(n,h,z,1),
-                        glm::vec2{image_desc.s0,image_desc.t1}
+                        glm::vec3{image_desc.s0,image_desc.t1,this_opacity}
                     });
 
         // tr
@@ -210,7 +219,7 @@ namespace raintk
                     *list_vx,
                     Vertex{
                         xf*glm::vec4(w,n,z,1),
-                        glm::vec2{image_desc.s1,image_desc.t0}
+                        glm::vec3{image_desc.s1,image_desc.t0,this_opacity}
                     });
 
         // br
@@ -218,7 +227,7 @@ namespace raintk
                     *list_vx,
                     Vertex{
                         xf*glm::vec4(w,h,z,1),
-                        glm::vec2{image_desc.s1,image_desc.t1}
+                        glm::vec3{image_desc.s1,image_desc.t1,this_opacity}
                     });
 
         // br
@@ -226,13 +235,13 @@ namespace raintk
                     *list_vx,
                     Vertex{
                         xf*glm::vec4(w,h,z,1),
-                        glm::vec2{image_desc.s1,image_desc.t1}
+                        glm::vec3{image_desc.s1,image_desc.t1,this_opacity}
                     });
     }
 
     void AtlasImage::setupTypeInit(Scene* scene)
     {
-        static_assert(sizeof(Vertex) == 24,
+        static_assert(sizeof(Vertex) == 28,
                       "ERROR: Vertex struct has padding");
 
         static bool init = false;
@@ -277,9 +286,9 @@ namespace raintk
                             [](ks::gl::StateSet* state_set){
                                 state_set->SetBlend(GL_TRUE);
                                 state_set->SetBlendFunction(
-                                    GL_SRC_ALPHA,
+                                    GL_ONE,
                                     GL_ONE_MINUS_SRC_ALPHA,
-                                    GL_SRC_ALPHA,
+                                    GL_ONE,
                                     GL_ONE_MINUS_SRC_ALPHA);
                             });
 

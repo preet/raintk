@@ -17,7 +17,7 @@
 #include <raintk/RainTkDrawSystem.hpp>
 #include <raintk/RainTkTransformSystem.hpp>
 #include <raintk/test/RainTkTestContext.hpp>
-#include <raintk/shaders/color_attr_glsl.hpp>
+#include <raintk/shaders/RainTkColorAttr.glsl.hpp>
 
 using namespace raintk;
 using AttrType = ks::gl::VertexBuffer::Attribute::Type;

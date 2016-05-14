@@ -64,7 +64,7 @@ namespace raintk
 
         // Enable depth writes to clear the buffer
         p.state_set->SetDepthMask(GL_TRUE);
-        p.state_set->SetClearColor(0.15,0.15,0.15,1.0);
+        p.state_set->SetClearColor(0.11,0.11,0.11,1.0);
 
         // Set the scissor extents to the viewport so that
         // everything cleared

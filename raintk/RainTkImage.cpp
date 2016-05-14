@@ -28,7 +28,7 @@ namespace raintk
 
     namespace
     {
-        #include <raintk/shaders/image_glsl.hpp>
+        #include <raintk/shaders/RainTkImage.glsl.hpp>
 
         struct Vertex
         {
@@ -168,7 +168,11 @@ namespace raintk
 
     void Image::onOpacityChanged()
     {
-        // TODO
+        auto u_f_opacity =
+                static_cast<ks::gl::Uniform<float>*>(
+                    m_uniform_set->list_uniforms[2].get());
+
+        u_f_opacity->Update(opacity.Get());
     }
 
     void Image::onSourceChanged()
@@ -215,6 +219,10 @@ namespace raintk
         m_uniform_set->list_uniforms.push_back(
                     make_unique<ks::gl::Uniform<glm::vec2>>(
                         "u_v2_tile",glm::vec2{1.0,1.0}));
+
+        m_uniform_set->list_uniforms.push_back(
+                    make_unique<ks::gl::Uniform<float>>(
+                        "u_f_opacity",1.0));
 
         m_uniform_set->list_uniforms.push_back(
                     make_unique<ks::gl::Uniform<GLint>>(
@@ -506,9 +514,9 @@ namespace raintk
                             [](ks::gl::StateSet* state_set){
                                 state_set->SetBlend(GL_TRUE);
                                 state_set->SetBlendFunction(
-                                    GL_SRC_ALPHA,
+                                    GL_ONE,
                                     GL_ONE_MINUS_SRC_ALPHA,
-                                    GL_SRC_ALPHA,
+                                    GL_ONE,
                                     GL_ONE_MINUS_SRC_ALPHA);
                             });
 

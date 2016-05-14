@@ -37,8 +37,8 @@ namespace raintk
 
 
         // Properties
-        Property<glm::u8vec3> color {
-            glm::u8vec3{255,51,51}
+        Property<glm::u8vec4> color {
+            glm::u8vec4{255,51,51,255}
         };
 
     protected:

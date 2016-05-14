@@ -38,10 +38,10 @@ shared_ptr<SinglePointArea> CreateButton(shared_ptr<Widget> parent)
     bg->name = "bg";
     bg->width = button->width.Get();
     bg->height = button->height.Get();
-    bg->color = glm::u8vec3(0,0,0);
+    bg->color = glm::u8vec4(0,0,0,255);
 
     auto text = MakeWidget<Text>(scene,button);
-    text->color = glm::u8vec3(255,255,255);
+    text->color = glm::u8vec4(255,255,255,255);
     text->text = "Click Me";
     text->z = mm(2);
     text->font = "FiraSansMinimal.ttf";
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     bg->height = mm(90);
     bg->x = 0.5*(root->width.Get()-bg->width.Get());
     bg->y = 0.5*(root->height.Get()-bg->height.Get());
-    bg->color = glm::u8vec3(60,60,60);
+    bg->color = glm::u8vec4(60,60,60,255);
 
     auto sa = MakeWidget<ScrollArea>(scene,bg);
     sa->width = bg->width.Get();
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
                         if(child->name == "bg")
                         {
                             auto bg = static_cast<Rectangle*>(child.get());
-                            bg->color = glm::u8vec3(70,70,70);
+                            bg->color = glm::u8vec4(70,70,70,255);
                         }
                     }
                 });
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
                         if(child->name == "bg")
                         {
                             auto bg = static_cast<Rectangle*>(child.get());
-                            bg->color = glm::u8vec3(0,0,0);
+                            bg->color = glm::u8vec4(0,0,0,255);
                         }
                     }
                 });

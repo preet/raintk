@@ -135,10 +135,7 @@ void main()
     // Weighted average
     alpha = (alpha + weight*sum_samples) / (1.0 + 4.0*weight);
 
-    vec4 color = v_v4_color;
-    color.a *= alpha;
-
-    gl_FragColor = color;
+    gl_FragColor = v_v4_color*alpha; // premultiplied alpha
 }
 
 // Debug

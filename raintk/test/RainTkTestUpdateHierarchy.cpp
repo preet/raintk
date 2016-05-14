@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
     words->text = "These are some words!";
     words->font = "FiraSansMinimal.ttf";
-    words->color = glm::u8vec3(255,255,255);
+    words->color = glm::u8vec4(255,255,255,255);
     words->x = [&](){ return 0.5f*(rect->width.Get()-words->width.Get()); };
     words->y = [&](){ return 0.5f*(rect->height.Get()-words->height.Get()); };
     words->z = mm(1.0f);

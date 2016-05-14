@@ -18,6 +18,9 @@
 #include <raintk/RainTkRectangle.hpp>
 #include <raintk/RainTkScrollArea.hpp>
 #include <raintk/RainTkText.hpp>
+#include <raintk/RainTkInputSystem.hpp>
+
+#include <cmath>
 
 using namespace raintk;
 
@@ -49,11 +52,11 @@ void CreateButtonColumn(shared_ptr<Widget> p)
         auto bg = MakeWidget<Rectangle>(scene,button);
         bg->width = button->width.Get();
         bg->height = button->height.Get();
-        bg->color = glm::u8vec3(0,0,0);
+        bg->color = glm::u8vec4(0,0,0,255);
         bg->z = mm(3.0f);
 
         auto text = MakeWidget<Text>(scene,bg);
-        text->color = glm::u8vec3(255,255,255);
+        text->color = glm::u8vec4(255,255,255,255);
         text->text = "Click Me";
         text->z = mm(0.5f);
         text->font = "FiraSansMinimal.ttf";
@@ -117,8 +120,6 @@ int main(int argc, char* argv[])
     TestContext c(600,600);
     auto scene = c.scene.get();
     auto root = c.scene->GetRootWidget();
-
-    // =========================================================== //
 
     // horizontal scroll area
     auto hsa = MakeWidget<ScrollArea>(scene,root);

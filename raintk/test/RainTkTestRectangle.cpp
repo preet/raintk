@@ -27,19 +27,19 @@ int main(int argc, char* argv[])
     auto& root = *(c.scene->GetRootWidget());
 
     // colors
-    std::vector<glm::u8vec3> list_colors {
-        glm::u8vec3{255,0,0},
-        glm::u8vec3{255,128,0},
-        glm::u8vec3{255,255,0},
-        glm::u8vec3{0,255,0},
-        glm::u8vec3{0,0,255},
-        glm::u8vec3{128,0,255},
-        glm::u8vec3{255,0,0},
-        glm::u8vec3{255,128,0},
-        glm::u8vec3{255,255,0},
-        glm::u8vec3{0,255,0},
-        glm::u8vec3{0,0,255},
-        glm::u8vec3{128,0,255}
+    std::vector<glm::u8vec4> list_colors {
+        glm::u8vec4{255,0,0,255},
+        glm::u8vec4{255,128,0,255},
+        glm::u8vec4{255,255,0,255},
+        glm::u8vec4{0,255,0,255},
+        glm::u8vec4{0,0,255,255},
+        glm::u8vec4{128,0,255,255},
+        glm::u8vec4{255,0,0,255},
+        glm::u8vec4{255,128,0,255},
+        glm::u8vec4{255,255,0,255},
+        glm::u8vec4{0,255,0,255},
+        glm::u8vec4{0,0,255,255},
+        glm::u8vec4{128,0,255,255}
     };
 
     for(int i=0; i < 12; i++)

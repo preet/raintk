@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
             [&](
             shared_ptr<Widget> parent,
             std::string name,
-            glm::u8vec3 color,
+            glm::u8vec4 color,
             float width,
             float height,
             float x,
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
     create_cancel_receiver(
                 root,
                 "blue",
-                glm::u8vec3(0,50,200),
+                glm::u8vec4(0,50,200,255),
                 mm(20),
                 mm(20),
                 mm(51),
@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
     create_cancel_receiver(
                 root,
                 "green",
-                glm::u8vec3(50,200,0),
+                glm::u8vec4(50,200,0,255),
                 mm(20),
                 mm(20),
                 mm(45),
@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
     create_cancel_receiver(
                 root,
                 "yellow",
-                glm::u8vec3(250,220,0),
+                glm::u8vec4(250,220,0,255),
                 mm(20),
                 mm(20),
                 mm(0),

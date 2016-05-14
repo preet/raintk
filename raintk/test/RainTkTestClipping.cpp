@@ -21,7 +21,7 @@ using namespace raintk;
 
 shared_ptr<Widget> CreateStripes(shared_ptr<Widget> parent,
                                  float width_mm,
-                                 glm::vec3 color)
+                                 glm::u8vec4 color)
 {
     auto scene = parent->GetScene();
 
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 
     right_view0->z = mm(1);
 
-    right_view0->color = glm::vec3{15,15,15};
+    right_view0->color = glm::u8vec4{45,45,45,255};
 
     right_view0->clip = true;
 
@@ -138,24 +138,24 @@ int main(int argc, char* argv[])
                 return 0.5*root_widget_ptr->height.Get();
             };
 
-    right_view1->color = glm::vec3{25,25,25};
+    right_view1->color = glm::u8vec4{65,65,65,255};
 
     right_view1->clip = true;
 
 
     // Add some long stripes that exceed the boundaries of
     // their parents to show clipping
-    auto yellow_stripes = CreateStripes(left_view,mm(300),glm::vec3(255,255,0));
+    auto yellow_stripes = CreateStripes(left_view,mm(300),glm::u8vec4(255,255,0,255));
     yellow_stripes->x = 0.5*(left_view->width.Get() - yellow_stripes->width.Get());
     yellow_stripes->y = 0.5*(left_view->height.Get() - yellow_stripes->height.Get());
     yellow_stripes->z = left_view->z.Get()+mm(0.1);
 
-    auto red_stripes = CreateStripes(right_view0,mm(300),glm::vec3(255,51,51));
+    auto red_stripes = CreateStripes(right_view0,mm(300),glm::u8vec4(255,51,51,255));
     red_stripes->x = 0.5*(right_view0->width.Get() - red_stripes->width.Get());
     red_stripes->y = 0.5*(right_view0->height.Get() - red_stripes->height.Get());
     red_stripes->z = right_view0->z.Get()+mm(0.1);
 
-    auto blue_stripes = CreateStripes(right_view1,mm(300),glm::vec3(51,51,255));
+    auto blue_stripes = CreateStripes(right_view1,mm(300),glm::u8vec4(51,100,255,255));
     blue_stripes->x = 0.5*(right_view1->width.Get() - blue_stripes->width.Get());
     blue_stripes->y = 0.5*(right_view1->height.Get() - blue_stripes->height.Get());
     blue_stripes->z = right_view1->z.Get()+mm(0.1);

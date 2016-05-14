@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
     rect_tl->x = 0.0f;
     rect_tl->y = 0.0f;
     rect_tl->z = 1;
-    rect_tl->color = glm::vec3(80,60,60);
+    rect_tl->color = glm::u8vec4(80,60,60,255);
 
 
     auto scroll_area_tl =
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
     rect_bl->x = 0.0f;
     rect_bl->y = rect_bl->height.Get();
     rect_bl->z = 1;
-    rect_bl->color = glm::vec3(60,80,60);
+    rect_bl->color = glm::u8vec4(60,80,60,255);
 
     Property<float> animated_size{scroll_area_tl->width.Get()*0.75f};
 
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     rect_right->x = root->width.Get()*0.33f;
     rect_right->y = 0.0f;
     rect_right->z = 1;
-    rect_right->color = glm::vec3(60,80,60);
+    rect_right->color = glm::u8vec4(60,80,60,255);
 
 
     auto scroll_area_right =

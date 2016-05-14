@@ -90,8 +90,8 @@ namespace raintk
             mm(2.0f)
         };
 
-        Property<glm::u8vec3> track_color{
-            glm::u8vec3(0,0,0)
+        Property<glm::u8vec4> track_color{
+            glm::u8vec4(0,0,0,255)
         };
 
         Property<float> track_opacity{
@@ -102,8 +102,8 @@ namespace raintk
             0.0f
         };
 
-        Property<glm::u8vec3> grip_color{
-            glm::u8vec3(100,100,100)
+        Property<glm::u8vec4> grip_color{
+            glm::u8vec4(100,100,100,255)
         };
 
         Property<float> grip_opacity{

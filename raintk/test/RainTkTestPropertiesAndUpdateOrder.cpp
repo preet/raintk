@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     button_add_text->z = mm(1.0f);
     button_add_text->text = "Add";
     button_add_text->font = "FiraSansMinimal.ttf";
-    button_add_text->color = glm::u8vec3(255,255,255);
+    button_add_text->color = glm::u8vec4(255,255,255,255);
 
     button_add_bg->width = [&](){ return button_add_text->width.Get()+mm(5); };
     button_add_bg->height = [&](){ return button_add_text->height.Get()+mm(5); };

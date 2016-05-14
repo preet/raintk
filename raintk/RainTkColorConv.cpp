@@ -451,38 +451,7 @@ namespace raintk
             };
         }
 
-        glm::u8vec3 ConvHexToVec3(std::string const &hex_str)
-        {
-            if(hex_str.size() != 7)
-            {
-                throw ColorInvalid();
-            }
-
-            auto r_it =
-                    g_lkup_byte_str.find(
-                        hex_str.substr(1,2));
-
-            auto g_it =
-                    g_lkup_byte_str.find(
-                        hex_str.substr(3,2));
-
-            auto b_it =
-                    g_lkup_byte_str.find(
-                        hex_str.substr(5,2));
-
-            if(r_it == g_lkup_byte_str.end() ||
-               g_it == g_lkup_byte_str.end() ||
-               b_it == g_lkup_byte_str.end())
-            {
-                throw ColorInvalid();
-            }
-
-            return glm::u8vec3(r_it->second,
-                               g_it->second,
-                               b_it->second);
-        }
-
-        glm::u8vec4 ConvHexToVec4(std::string const &hex_str)
+        glm::u8vec4 ConvHexToVec4(std::string hex_str)
         {
             if(!(hex_str.size()==7 || hex_str.size()==9))
             {
@@ -491,8 +460,7 @@ namespace raintk
 
             if(hex_str.size()==7)
             {
-                auto v = ConvHexToVec3(hex_str);
-                return glm::u8vec4(v.r,v.g,v.b,255);
+                hex_str += "FF";
             }
 
             auto r_it =

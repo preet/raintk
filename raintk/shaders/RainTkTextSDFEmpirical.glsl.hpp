@@ -101,10 +101,7 @@ void main()
                              glyph_center+v_f_glyph_sm_width,
                              dist);
 
-    vec4 color = v_v4_color;
-    color.a *= alpha;
-
-    gl_FragColor = color;
+    gl_FragColor = v_v4_color*alpha; // premultiplied alpha
 }
 
 // Debug

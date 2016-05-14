@@ -26,7 +26,7 @@ namespace raintk
 
     namespace
     {
-        #include <raintk/shaders/color_attr_glsl.hpp>
+        #include <raintk/shaders/RainTkColorAttr.glsl.hpp>
 
         struct Vertex
         {
@@ -115,17 +115,8 @@ namespace raintk
 
     void Rectangle::onOpacityChanged()
     {
-        auto new_opacity = opacity.Get();
-        auto& draw_data = m_cmlist_draw_data->GetComponent(m_entity_id);
-
-        if(new_opacity < 1.0f)
-        {
-            draw_data.key = g_draw_key_xpr;
-        }
-        else
-        {
-            draw_data.key = g_draw_key_opq;
-        }
+        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
+        upd_data.update |= UpdateData::UpdateDrawables;
     }
 
     void Rectangle::onVisibilityChanged()
@@ -162,14 +153,10 @@ namespace raintk
         }
 
         // Create new DrawData
-        auto draw_key =
-                (opacity.Get() < 1.0f) ?
-                    g_draw_key_xpr : g_draw_key_opq;
-
         m_cmlist_draw_data->Create(
                     m_entity_id,
                     DrawData{
-                        draw_key,
+                        g_draw_key_opq,
                         make_unique<std::vector<u8>>(),
                         visible.Get()});
 
@@ -197,13 +184,26 @@ namespace raintk
         list_vx->reserve(6*sizeof(Vertex));
 
         auto const o = opacity.Get();
-        glm::vec3 rgb = color.Get();
+        glm::u8vec4 rgba = color.Get();
+
+        float final_opacity = (o*rgba.a)/255.0f;
+
+        if(final_opacity < 1.0f)
+        {
+            draw_data.key = g_draw_key_xpr;
+            draw_data.key.SetClip(m_clip_id);
+        }
+        else
+        {
+            draw_data.key = g_draw_key_opq;
+            draw_data.key.SetClip(m_clip_id);
+        }
 
         glm::u8vec4 const c {
-            static_cast<u8>(o*rgb.r),
-            static_cast<u8>(o*rgb.g),
-            static_cast<u8>(o*rgb.b),
-            static_cast<u8>(o*255)
+            static_cast<u8>(rgba.r*final_opacity),
+            static_cast<u8>(rgba.g*final_opacity),
+            static_cast<u8>(rgba.b*final_opacity),
+            static_cast<u8>(rgba.a*o)
         };
 
         auto const w = width.Get();
@@ -293,9 +293,9 @@ namespace raintk
                                     [](ks::gl::StateSet* state_set){
                                         state_set->SetBlend(GL_TRUE);
                                         state_set->SetBlendFunction(
-                                            GL_SRC_ALPHA,
+                                            GL_ONE,
                                             GL_ONE_MINUS_SRC_ALPHA,
-                                            GL_SRC_ALPHA,
+                                            GL_ONE,
                                             GL_ONE_MINUS_SRC_ALPHA);
                                     });
 

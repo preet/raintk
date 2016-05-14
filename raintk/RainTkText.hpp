@@ -100,8 +100,8 @@ namespace raintk
         ks::text::Hint& GetTextHint();
 
         // Properties
-        Property<glm::u8vec3> color {
-            glm::u8vec3{51,51,51}
+        Property<glm::u8vec4> color {
+            glm::u8vec4{51,51,51,255}
         };
 
         Property<std::string> text {

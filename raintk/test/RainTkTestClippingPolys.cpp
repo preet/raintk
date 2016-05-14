@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     t1_parent->y = mm(10);
     t1_parent->width = mm(50);
     t1_parent->height = mm(50);
-    t1_parent->color = glm::u8vec3(65,65,65);
+    t1_parent->color = glm::u8vec4(65,65,65,255);
     t1_parent->clip = true;
 
     auto t1_child = MakeWidget<Rectangle>(scene,t1_parent);
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     t1_child->z = mm(1);
     t1_child->width = mm(30);
     t1_child->height = mm(30);
-    t1_child->color = glm::u8vec3(180,65,65);
+    t1_child->color = glm::u8vec4(180,65,65,255);
     t1_child->rotation = deg(35);
 
 
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     t2_parent->y = t1_parent->y.Get()+t1_parent->height.Get()+mm(10);
     t2_parent->width = mm(50);
     t2_parent->height = mm(50);
-    t2_parent->color = glm::u8vec3(65,65,65);
+    t2_parent->color = glm::u8vec4(65,65,65,255);
     t2_parent->clip = true;
 
     auto t2_child = MakeWidget<Rectangle>(scene,t2_parent);
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     t2_child->z = mm(1);
     t2_child->width = mm(40);
     t2_child->height = mm(40);
-    t2_child->color = glm::u8vec3(180,65,65);
+    t2_child->color = glm::u8vec4(180,65,65,255);
     t2_child->rotation = deg(35);
     t2_child->clip = true;
 
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     t2_gc->z = mm(2);
     t2_gc->width = mm(30);
     t2_gc->height = mm(30);
-    t2_gc->color = glm::u8vec3(65,65,180);
+    t2_gc->color = glm::u8vec4(65,65,180,255);
     t2_gc->rotation = deg(15);
 
 

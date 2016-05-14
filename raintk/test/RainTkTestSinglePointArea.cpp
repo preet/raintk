@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     r0->y = 0.5*(root->height.Get() - r0->height.Get());
     r0->z = 6;
     r0->rotation = r0_angle_rads;
-    r0->color = glm::vec3(60,60,60);
+    r0->color = glm::u8vec4(60,60,60,255);
 
     auto sp_area0 =
             MakeWidget<SinglePointArea>(
@@ -56,12 +56,12 @@ int main(int argc, char* argv[])
 
     auto on_pressed0 =
             [&](){
-                r0->color = glm::vec3(150,60,60);
+                r0->color = glm::u8vec4(150,60,60,255);
             };
 
     auto on_released0 =
             [&](){
-                r0->color = glm::vec3(60,60,60);
+                r0->color = glm::u8vec4(60,60,60,255);
             };
 
     auto on_clicked0 =
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     r1->y = 0.5*(root->height.Get() - r1->height.Get());
     r1->z = 4;
     r1->rotation = (r1_angle_rads);
-    r1->color = glm::vec3(80,80,80);
+    r1->color = glm::u8vec4(80,80,80,255);
 
     auto sp_area1 =
             MakeWidget<SinglePointArea>(
@@ -122,12 +122,12 @@ int main(int argc, char* argv[])
 
     auto on_pressed1 =
             [&](){
-                r1->color = glm::vec3(60,60,150);
+                r1->color = glm::u8vec4(60,60,150,255);
             };
 
     auto on_released1 =
             [&](){
-                r1->color = glm::vec3(80,80,80);
+                r1->color = glm::u8vec4(80,80,80,255);
             };
 
     auto on_clicked1 =

@@ -35,15 +35,15 @@ int main(int argc, char* argv[])
     auto scene = c.scene.get();
 
     // colors
-    std::vector<glm::u8vec3> list_colors {
-        glm::u8vec3{255,0,0}, // r
-        glm::u8vec3{255,128,0}, // o
-        glm::u8vec3{255,255,0}, // y
-        glm::u8vec3{0,255,0}, // g
-        glm::u8vec3{0,255,255}, // c
-        glm::u8vec3{128,0,255}, // i
-        glm::u8vec3{255,0,255}, // v
-        glm::u8vec3{255,0,127} // p
+    std::vector<glm::u8vec4> list_colors {
+        glm::u8vec4{255,0,0,255}, // r
+        glm::u8vec4{255,128,0,255}, // o
+        glm::u8vec4{255,255,0,255}, // y
+        glm::u8vec4{0,255,0,255}, // g
+        glm::u8vec4{0,255,255,255}, // c
+        glm::u8vec4{128,0,255,255}, // i
+        glm::u8vec4{255,0,255,255}, // v
+        glm::u8vec4{255,0,127,255} // p
     };
 
     std::vector<glm::vec2> list_dims {

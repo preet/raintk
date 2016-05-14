@@ -204,9 +204,9 @@ SOURCES += \
 #    $${PATH_RAINTK}/raintk/test/RainTkTestAlignment.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestListView.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestDrag.cpp
+    $${PATH_RAINTK}/raintk/test/RainTkTestImageAtlas.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestInputResampling.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestInputReply.cpp
-    $${PATH_RAINTK}/raintk/test/RainTkTestImageAtlas.cpp
 
 
 

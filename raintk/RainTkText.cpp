@@ -27,9 +27,9 @@ namespace raintk
     namespace text_detail
     {
         // Shader
-        #include <raintk/shaders/text_sdf_glsl_empirical.hpp>
-//         #include <raintk/shaders/text_sdf_glsl.hpp>
-//         #include <raintk/shaders/text_sdf_glsl_es_no_ext.hpp>
+        #include <raintk/shaders/RainTkTextSDFEmpirical.glsl.hpp>
+//        #include <raintk/shaders/RainTkTextSDF.glsl.hpp>
+//        #include <raintk/shaders/RainTkTextSDFNoExt.glsl.hpp>
 
         // VertexLayout
         using AttrType = ks::gl::VertexBuffer::Attribute::Type;
@@ -624,11 +624,13 @@ namespace raintk
         {
             auto const &this_color = color.Get();
 
+            float const k_to_fp = 1.0f/255.0f;
+            float const final_opacity = (this_color.a*k_to_fp)*opacity.Get();
             glm::vec4 const color_norm(
-                        this_color.r/255.0f,
-                        this_color.g/255.0f,
-                        this_color.b/255.0f,
-                        opacity.Get());
+                        this_color.r*k_to_fp*final_opacity,
+                        this_color.g*k_to_fp*final_opacity,
+                        this_color.b*k_to_fp*final_opacity,
+                        final_opacity);
 
             auto u_array_v4_color =
                     static_cast<ks::gl::UniformArray<glm::vec4>*>(
@@ -956,9 +958,9 @@ namespace raintk
                             [](ks::gl::StateSet* state_set){
                                 state_set->SetBlend(GL_TRUE);
                                 state_set->SetBlendFunction(
-                                    GL_SRC_ALPHA,
+                                    GL_ONE,
                                     GL_ONE_MINUS_SRC_ALPHA,
-                                    GL_SRC_ALPHA,
+                                    GL_ONE,
                                     GL_ONE_MINUS_SRC_ALPHA);
                             });
 

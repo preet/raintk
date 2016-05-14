@@ -36,13 +36,11 @@ namespace raintk
     namespace Color
     {
         // Expects a string that starts with a hash '#',
-        // followed by 6 hex characters 0-9,a-f,A-F
+        // followed by 6 or 8 hex characters 0-9,a-f,A-F
         // String will be interpreted as the color channels
-        // R,G,B from left to right for every two chars
-        // ex: #0A0B0C: R=10, G=11, B=12
-        glm::u8vec3 ConvHexToVec3(std::string const &hex_str);
-
-        glm::u8vec4 ConvHexToVec4(std::string const &hex_str);
+        // R,G,B,A from left to right for every two chars
+        // ex: #0A0B0CFF: R=10, G=11, B=12, A=255
+        glm::u8vec4 ConvHexToVec4(std::string hex_str);
     }
 
     // =========================================================== //

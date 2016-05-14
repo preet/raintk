@@ -64,22 +64,26 @@ int main(int argc, char* argv[])
     auto atlas_image0 = MakeWidget<AtlasImage>(scene,root,image_atlas_ptr,1);
     atlas_image0->width = 100;
     atlas_image0->height = 100;
+//    atlas_image0->opacity = 1.0f;
 
     auto atlas_image1 = MakeWidget<AtlasImage>(scene,root,image_atlas_ptr,2);
     atlas_image1->width = 100;
     atlas_image1->height = 100;
     atlas_image1->x = 100;
+//    atlas_image1->opacity = 0.75f;
 
     auto atlas_image2 = MakeWidget<AtlasImage>(scene,root,image_atlas_ptr,3);
     atlas_image2->width = 100;
     atlas_image2->height = 100;
     atlas_image2->y = 100;
+//    atlas_image2->opacity = 0.5f;
 
     auto atlas_image3 = MakeWidget<AtlasImage>(scene,root,image_atlas_ptr,4);
     atlas_image3->width = 100;
     atlas_image3->height = 100;
     atlas_image3->x = 100;
     atlas_image3->y = 100;
+//    atlas_image3->opacity = 0.25f;
 
 
     // Run!

@@ -44,6 +44,7 @@ namespace raintk
         void onHeightChanged() override;
         void onClipIdUpdated() override;
         void onTransformUpdated() override;
+        void onOpacityChanged() override;
         void createDrawables() override;
         void destroyDrawables() override;
         void updateDrawables() override;

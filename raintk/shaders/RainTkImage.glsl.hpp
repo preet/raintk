@@ -37,11 +37,12 @@ std::string const image_frag_glsl = R"___DELIM___(
 #endif
 
 varying lowp vec2 v_v2_tex0;
+uniform lowp float u_f_opacity;
 uniform lowp sampler2D u_s_tex0;
 
 void main()
 {
-    gl_FragColor = texture2D(u_s_tex0,v_v2_tex0);
+    gl_FragColor = texture2D(u_s_tex0,v_v2_tex0)*(u_f_opacity);
 }
 
 )___DELIM___";
