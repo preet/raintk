@@ -81,7 +81,7 @@ namespace raintk
 
         auto& list_upd_data = m_cmlist_upd_data->GetSparseList();
 
-        uint const max_upd_loop_count=3;
+        uint const max_upd_loop_count=4;
 
         for(uint i=0; i < max_upd_loop_count; i++)
         {
@@ -114,7 +114,7 @@ namespace raintk
             if(i == max_upd_loop_count-1)
             {
                 // TODO throw?
-                rtklog.Warn() << "UpdateSystem: "
+                rtklog.Warn() << "TransformSystem: "
                               << "Too many update loops with "
                                  "updated widgets still remaining";
             }
@@ -134,6 +134,10 @@ namespace raintk
                     m_scene->GetRootWidget().get(),
                     m_cmlist_upd_data,
                     m_cmlist_xf_data);
+
+        updateWidgetOpacities(
+                    m_scene->GetRootWidget().get(),
+                    1.0f);
     }
 
     void TransformSystem::updateAnimations()
@@ -634,6 +638,25 @@ namespace raintk
                 // Leave
                 dfs_stack.pop_back();
             }
+        }
+    }
+
+    // * Opacities are part of the widget hierarchy
+    // * The final accumulated opacity of a widget is the
+    //   product of its own opacity with the opacity of all
+    //   the widget's ancestors
+    void TransformSystem::updateWidgetOpacities(Widget* widget,float opacity)
+    {
+        opacity *= widget->opacity.Get();
+        if(widget->m_accumulated_opacity != opacity)
+        {
+            widget->m_accumulated_opacity = opacity;
+            widget->onAccOpacityUpdated();
+        }
+
+        for(auto& child : widget->GetChildren())
+        {
+            updateWidgetOpacities(child.get(),opacity);
         }
     }
 }

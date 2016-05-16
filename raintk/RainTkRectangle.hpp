@@ -42,13 +42,14 @@ namespace raintk
         };
 
     protected:
+        virtual void onColorChanged();
+
         void onWidthChanged() override;
         void onHeightChanged() override;
-        void onOpacityChanged() override;
-        void onVisibilityChanged() override;
+
         void onClipIdUpdated() override;
         void onTransformUpdated() override;
-        virtual void onColorChanged();
+        void onAccOpacityUpdated() override;
 
         void createDrawables() override;
         void destroyDrawables() override;

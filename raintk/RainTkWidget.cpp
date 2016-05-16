@@ -43,7 +43,9 @@ namespace raintk
                 m_scene->template GetComponentList<UpdateData>())),
         m_cmlist_xf_data(
             static_cast<TransformDataComponentList*>(
-                m_scene->template GetComponentList<TransformData>()))
+                m_scene->template GetComponentList<TransformData>())),
+        m_clip_id(0),
+        m_accumulated_opacity(1.0f)
     {}
 
     void Widget::Init(ks::Object::Key const &,
@@ -155,6 +157,12 @@ namespace raintk
                     this_widget,
                     &Widget::onClipChanged,
                     ks::ConnectionType::Direct);
+
+//        m_cid_opacity =
+//                opacity.signal_changed.Connect(
+//                    this_widget,
+//                    &Widget::onOpacityChanged,
+//                    ks::ConnectionType::Direct);
     }
 
     Widget::~Widget()
@@ -429,6 +437,11 @@ namespace raintk
     }
 
     void Widget::onTransformUpdated()
+    {
+        // Do nothing for base widget
+    }
+
+    void Widget::onAccOpacityUpdated()
     {
         // Do nothing for base widget
     }

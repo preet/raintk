@@ -39,12 +39,6 @@ namespace raintk
                     this_widget,
                     &DrawableWidget::onVisibilityChanged,
                     ks::ConnectionType::Direct);
-
-        m_cid_opacity =
-                opacity.signal_changed.Connect(
-                    this_widget,
-                    &DrawableWidget::onOpacityChanged,
-                    ks::ConnectionType::Direct);
     }
 
     DrawableWidget::~DrawableWidget()
@@ -58,11 +52,6 @@ namespace raintk
     }
 
     void DrawableWidget::onVisibilityChanged()
-    {
-
-    }
-
-    void DrawableWidget::onOpacityChanged()
     {
 
     }

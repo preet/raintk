@@ -125,16 +125,16 @@ namespace raintk
         };
 
     private:
-        void onOpacityChanged() override;
-        void onVisibilityChanged() override;
-        void onClipIdUpdated() override;
-        void onTransformUpdated() override;
         void onColorChanged();
         void onTextChanged();
         void onFontChanged();
         void onSizeChanged();
         void onLineWidthChanged();
         void onAlignmentChanged();
+        void onVisibilityChanged() override;
+        void onClipIdUpdated() override;
+        void onTransformUpdated() override;
+        void onAccOpacityUpdated() override;
         void update() override;
         void createDrawables() override;
         void destroyDrawables() override;

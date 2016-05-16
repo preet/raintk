@@ -268,46 +268,6 @@ namespace raintk
         return m_text_hint;
     }
 
-    void Text::onOpacityChanged()
-    {
-        m_upd_color = true;
-
-        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
-        upd_data.update |= UpdateData::UpdateDrawables;
-    }
-
-    void Text::onVisibilityChanged()
-    {
-        for(auto& glyph_batch : m_list_glyph_batches)
-        {
-            auto& draw_data =
-                    m_cmlist_draw_data->GetComponent(
-                        glyph_batch.entity_id);
-
-            draw_data.visible = visible.Get();
-        }
-    }
-
-    void Text::onClipIdUpdated()
-    {
-        for(auto& glyph_batch : m_list_glyph_batches)
-        {
-            auto& draw_data =
-                    m_cmlist_draw_data->GetComponent(
-                        glyph_batch.entity_id);
-
-            draw_data.key.SetClip(m_clip_id);
-        }
-    }
-
-    void Text::onTransformUpdated()
-    {
-        m_upd_xf = true;
-
-        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
-        upd_data.update |= UpdateData::UpdateDrawables;
-    }
-
     void Text::onColorChanged()
     {
         m_upd_color = true;
@@ -354,6 +314,47 @@ namespace raintk
         auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
         upd_data.update |= UpdateData::UpdateWidget;
     }
+
+    void Text::onVisibilityChanged()
+    {
+        for(auto& glyph_batch : m_list_glyph_batches)
+        {
+            auto& draw_data =
+                    m_cmlist_draw_data->GetComponent(
+                        glyph_batch.entity_id);
+
+            draw_data.visible = visible.Get();
+        }
+    }
+
+    void Text::onClipIdUpdated()
+    {
+        for(auto& glyph_batch : m_list_glyph_batches)
+        {
+            auto& draw_data =
+                    m_cmlist_draw_data->GetComponent(
+                        glyph_batch.entity_id);
+
+            draw_data.key.SetClip(m_clip_id);
+        }
+    }
+
+    void Text::onTransformUpdated()
+    {
+        m_upd_xf = true;
+
+        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
+        upd_data.update |= UpdateData::UpdateDrawables;
+    }
+
+    void Text::onAccOpacityUpdated()
+    {
+        m_upd_color = true;
+
+        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
+        upd_data.update |= UpdateData::UpdateDrawables;
+    }
+
 
     void Text::update()
     {
@@ -620,14 +621,15 @@ namespace raintk
 
     void Text::updateColorUniforms()
     {
-        auto const &draw_data = m_cmlist_draw_data->GetComponent(m_entity_id);
-
         for(auto &batch : m_list_glyph_batches)
         {
             auto const &this_color = color.Get();
 
             float const k_to_fp = 1.0f/255.0f;
-            float const final_opacity = (this_color.a*k_to_fp)*draw_data.opacity;
+            float const final_opacity =
+                    (this_color.a*k_to_fp)*
+                    m_accumulated_opacity;
+
             glm::vec4 const color_norm(
                         this_color.r*k_to_fp*final_opacity,
                         this_color.g*k_to_fp*final_opacity,

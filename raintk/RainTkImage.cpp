@@ -135,6 +135,31 @@ namespace raintk
         destroyDrawables();
     }
 
+    void Image::onSourceChanged()
+    {
+        m_upd_texture = true;
+        m_upd_tile_ratio = true;
+
+        m_cmlist_update_data->GetComponent(m_entity_id).
+                update |= UpdateData::UpdateDrawables;
+    }
+
+    void Image::onFillModeChanged()
+    {
+        m_upd_tile_ratio = true;
+
+        m_cmlist_update_data->GetComponent(m_entity_id).
+                update |= UpdateData::UpdateDrawables;
+    }
+
+    void Image::onSmoothChanged()
+    {
+        m_upd_smooth = true;
+
+        m_cmlist_update_data->GetComponent(m_entity_id).
+                update |= UpdateData::UpdateDrawables;
+    }
+
     void Image::onWidthChanged()
     {
         m_upd_geometry = true;
@@ -167,34 +192,9 @@ namespace raintk
                 update |= UpdateData::UpdateDrawables;
     }
 
-    void Image::onOpacityChanged()
+    void Image::onAccOpacityUpdated()
     {
         m_upd_opacity = true;
-
-        m_cmlist_update_data->GetComponent(m_entity_id).
-                update |= UpdateData::UpdateDrawables;
-    }
-
-    void Image::onSourceChanged()
-    {
-        m_upd_texture = true;
-        m_upd_tile_ratio = true;
-
-        m_cmlist_update_data->GetComponent(m_entity_id).
-                update |= UpdateData::UpdateDrawables;
-    }
-
-    void Image::onFillModeChanged()
-    {
-        m_upd_tile_ratio = true;
-
-        m_cmlist_update_data->GetComponent(m_entity_id).
-                update |= UpdateData::UpdateDrawables;
-    }
-
-    void Image::onSmoothChanged()
-    {
-        m_upd_smooth = true;
 
         m_cmlist_update_data->GetComponent(m_entity_id).
                 update |= UpdateData::UpdateDrawables;
@@ -483,13 +483,11 @@ namespace raintk
 
     void Image::updateOpacity()
     {
-        auto& draw_data = m_cmlist_draw_data->GetComponent(m_entity_id);
-
         auto u_f_opacity =
                 static_cast<ks::gl::Uniform<float>*>(
                     m_uniform_set->list_uniforms[2].get());
 
-        u_f_opacity->Update(draw_data.opacity);
+        u_f_opacity->Update(m_accumulated_opacity);
     }
 
     void Image::setupTypeInit(Scene* scene)

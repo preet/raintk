@@ -14,6 +14,8 @@
   limitations under the License.
 */
 
+#define RAINTK_TEST_OPACITY_HIERARCHY
+
 #include <raintk/test/RainTkTestContext.hpp>
 #include <raintk/RainTkRectangle.hpp>
 #include <raintk/RainTkText.hpp>
@@ -79,39 +81,14 @@ int main(int argc, char* argv[])
 
     scene->signal_after_update.Connect(
                 [&](){
-                    auto& dd_b = scene->GetDrawSystem()->
-                            GetDrawDataComponentList()->
-                            GetComponent(b->GetEntityId());
-
-                    auto& dd_c = scene->GetDrawSystem()->
-                            GetDrawDataComponentList()->
-                            GetComponent(c->GetEntityId());
-
-                    auto& dd_e = scene->GetDrawSystem()->
-                            GetDrawDataComponentList()->
-                            GetComponent(e->GetEntityId());
-
-                    auto& dd_f = scene->GetDrawSystem()->
-                            GetDrawDataComponentList()->
-                            GetComponent(f->GetEntityId());
-
-                    auto& dd_g = scene->GetDrawSystem()->
-                            GetDrawDataComponentList()->
-                            GetComponent(g->GetEntityId());
-
-                    auto& dd_h = scene->GetDrawSystem()->
-                            GetDrawDataComponentList()->
-                            GetComponent(h->GetEntityId());
-
                     bool ok = false;
-
                     ok =
-                            (dd_b.opacity==0.5f) &&
-                            (dd_g.opacity==0.25f) &&
-                            (dd_c.opacity==0.8f) &&
-                            (dd_e.opacity==0.4f) &&
-                            (dd_f.opacity==0.4f) &&
-                            (dd_h.opacity==0.2f);
+                            (b->m_accumulated_opacity==0.5f) &&
+                            (g->m_accumulated_opacity==0.25f) &&
+                            (c->m_accumulated_opacity==0.8f) &&
+                            (e->m_accumulated_opacity==0.4f) &&
+                            (f->m_accumulated_opacity==0.4f) &&
+                            (h->m_accumulated_opacity==0.2f);
 
                     assert(ok);
                 });

@@ -56,6 +56,10 @@ namespace raintk
                 UpdateDataComponentList* cmlist_upd_data,
                 TransformDataComponentList* cmlist_xf_data);
 
+        static void updateWidgetOpacities(
+                Widget* widget,
+                float opacity);
+
         Scene* const m_scene;
         UpdateDataComponentList* m_cmlist_upd_data;
         TransformDataComponentList* m_cmlist_xf_data;

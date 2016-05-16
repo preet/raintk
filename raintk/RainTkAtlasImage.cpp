@@ -114,7 +114,7 @@ namespace raintk
                 update |= UpdateData::UpdateDrawables;
     }
 
-    void AtlasImage::onOpacityChanged()
+    void AtlasImage::onAccOpacityUpdated()
     {
         m_upd_geometry = true;
 
@@ -178,7 +178,7 @@ namespace raintk
         auto const h = height.Get();
         float const z = 0.0f;
         float const n = 0.0f;
-        float const this_opacity = draw_data.opacity;
+        float const this_opacity = m_accumulated_opacity;
 
         auto const &xf = m_cmlist_xf_data->
                 GetComponent(m_entity_id).world_xf;

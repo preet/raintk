@@ -49,10 +49,6 @@ namespace raintk
             true
         };
 
-        Property<float> opacity {
-            1.0f
-        };
-
         template<typename T>
         static Id GetTypeId()
         {
@@ -73,7 +69,6 @@ namespace raintk
 
     protected:
         virtual void onVisibilityChanged();
-        virtual void onOpacityChanged();
 
         // * Create the renderable components for this
         //   Widget (like RenderData or BatchData)
@@ -87,7 +82,6 @@ namespace raintk
 
 
         Id m_cid_visible;
-        Id m_cid_opacity;
 
     private:
         static uint s_type_id_count;

@@ -54,7 +54,6 @@ namespace raintk
         using ListChildren = std::unordered_set<shared_ptr<Widget>>;
 
         friend class TransformSystem;
-        friend class UpdateSystem;
 
         // Only the Scene should be able to create a root widget
         class RootWidgetKey {
@@ -160,6 +159,10 @@ namespace raintk
             false
         };
 
+        Property<float> opacity{
+            1.0f
+        };
+
         // signal that is emitted from within the
         // destructor of this Widget
         ks::Signal<Widget*> signal_destroying_widget;
@@ -177,6 +180,7 @@ namespace raintk
 
         virtual void onClipIdUpdated();
         virtual void onTransformUpdated();
+        virtual void onAccOpacityUpdated();
 
         virtual void update();
 
@@ -197,8 +201,14 @@ namespace raintk
         Id m_cid_scale;
         Id m_cid_origin;
         Id m_cid_clip;
+        Id m_cid_opacity;
 
         Id m_clip_id;
+
+#ifdef RAINTK_TEST_OPACITY_HIERARCHY
+    public:
+#endif
+        float m_accumulated_opacity;
     };
 
     // ============================================================= //

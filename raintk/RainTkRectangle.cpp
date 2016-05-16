@@ -101,6 +101,12 @@ namespace raintk
         destroyDrawables();
     }
 
+    void Rectangle::onColorChanged()
+    {
+        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
+        upd_data.update |= UpdateData::UpdateDrawables;
+    }
+
     void Rectangle::onWidthChanged()
     {
         auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
@@ -111,18 +117,6 @@ namespace raintk
     {
         auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
         upd_data.update |= UpdateData::UpdateDrawables;
-    }
-
-    void Rectangle::onOpacityChanged()
-    {
-        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
-        upd_data.update |= UpdateData::UpdateDrawables;
-    }
-
-    void Rectangle::onVisibilityChanged()
-    {
-        auto& draw_data = m_cmlist_draw_data->GetComponent(m_entity_id);
-        draw_data.visible = visible.Get();
     }
 
     void Rectangle::onClipIdUpdated()
@@ -137,7 +131,7 @@ namespace raintk
         upd_data.update |= UpdateData::UpdateDrawables;
     }
 
-    void Rectangle::onColorChanged()
+    void Rectangle::onAccOpacityUpdated()
     {
         auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
         upd_data.update |= UpdateData::UpdateDrawables;
@@ -183,7 +177,7 @@ namespace raintk
         list_vx->clear();
         list_vx->reserve(6*sizeof(Vertex));
 
-        auto const o = draw_data.opacity;
+        auto const o = m_accumulated_opacity;
         glm::u8vec4 rgba = color.Get();
 
         float final_opacity = (o*rgba.a)/255.0f;
