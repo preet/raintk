@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
                 t->x = raintk::mm(2);
                 t->z = raintk::mm(1);
                 t->size = raintk::mm(4);
+                t->height_calc = raintk::Text::HeightCalc::FontBounds;
 
                 return t;
             };
@@ -140,6 +141,7 @@ int main(int argc, char* argv[])
                 t->x = raintk::mm(2) + 300;
                 t->z = raintk::mm(1);
                 t->size = raintk::mm(2.5);
+                t->height_calc = raintk::Text::HeightCalc::FontBounds;
 
                 return t;
             };

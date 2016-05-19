@@ -86,6 +86,21 @@ namespace raintk
             Center=3
         };
 
+        enum class HeightCalc
+        {
+            // Calculate the height of this Text based on
+            // glyph position and dimensions. The max and
+            // min height will be at the very edge of the
+            // glyph bounds. This is the default
+            GlyphBounds,
+
+            // Calculate the height of this Text based on
+            // font metrics. The max and min height may not
+            // fall on the edge of the glyphs and usually
+            // leaves additional space above and below
+            FontBounds
+        };
+
         using base_type = DrawableWidget;
 
         Text(ks::Object::Key const &key,
@@ -98,6 +113,7 @@ namespace raintk
         ~Text();
 
         ks::text::Hint& GetTextHint();
+
 
         // Properties
         Property<glm::u8vec4> color {
@@ -124,6 +140,11 @@ namespace raintk
             Alignment::Auto
         };
 
+        Property<HeightCalc> height_calc{
+            HeightCalc::GlyphBounds
+        };
+
+
     private:
         void onColorChanged();
         void onTextChanged();
@@ -131,6 +152,7 @@ namespace raintk
         void onSizeChanged();
         void onLineWidthChanged();
         void onAlignmentChanged();
+        void onHeightCalcChanged();
         void onVisibilityChanged() override;
         void onClipIdUpdated() override;
         void onTransformUpdated() override;
@@ -162,6 +184,7 @@ namespace raintk
         Id m_cid_size;
         Id m_cid_line_width;
         Id m_cid_alignment;
+        Id m_cid_height_calc;
 
         bool m_upd_recreate{false};
         bool m_upd_xf{false};

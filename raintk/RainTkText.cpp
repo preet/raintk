@@ -256,6 +256,12 @@ namespace raintk
                     this_text,
                     &Text::onAlignmentChanged,
                     ks::ConnectionType::Direct);
+
+        m_cid_height_calc =
+                height_calc.signal_changed.Connect(
+                    this_text,
+                    &Text::onHeightCalcChanged,
+                    ks::ConnectionType::Direct);
     }
 
     Text::~Text()
@@ -310,6 +316,12 @@ namespace raintk
     }
 
     void Text::onAlignmentChanged()
+    {
+        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
+        upd_data.update |= UpdateData::UpdateWidget;
+    }
+
+    void Text::onHeightCalcChanged()
     {
         auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
         upd_data.update |= UpdateData::UpdateWidget;
@@ -385,18 +397,33 @@ namespace raintk
         float new_width = 0.0f;
 
         // The first baseline is 'ascent' pixels below the top
-        float baseline_y = list_lines[0].ascent;
+        float baseline_top = list_lines.front().ascent;
+        float baseline_bottom = baseline_top;
 
         for(auto const &line : list_lines)
         {
-            new_width = std::max<float>(new_width,line.x_max);
-            baseline_y += line.spacing;
+            new_width = std::max<float>(new_width,line.x_max-line.x_min);
+            baseline_bottom += line.spacing;
         }
 
-        new_height =
-                baseline_y -
-                list_lines.back().spacing +
-                abs(list_lines.back().descent);
+        baseline_bottom -= list_lines.back().spacing;
+
+        if(height_calc.Get() == HeightCalc::GlyphBounds)
+        {
+            // Height representing the bounds of the contained glyphs
+            new_height =
+                    baseline_bottom-
+                    list_lines.back().y_min-
+                    list_lines.front().ascent+
+                    list_lines.front().y_max;
+        }
+        else
+        {
+            // Height considering the font dimensions
+            new_height =
+                    baseline_bottom +
+                    abs(list_lines.back().descent);
+        }
 
         float const k_scale =
                 size.Get()/m_scene->GetTextGlyphSizePx();
@@ -720,11 +747,16 @@ namespace raintk
         // The first baseline is 'ascent' pixels below the top
         float baseline_y = list_lines[0].ascent;
 
+        sint text_x_min = std::numeric_limits<sint>::max();
+        sint text_x_max = std::numeric_limits<sint>::min();
 
         for(auto const &line : list_lines)
         {
-            text_width = std::max<float>(text_width,line.x_max);
+            text_x_min = std::min<uint>(text_x_min,line.x_min);
+            text_x_max = std::max<uint>(text_x_max,line.x_max);
         }
+
+        text_width = text_x_max-text_x_min;
 
         // Get alignment and shift
         auto this_alignment = alignment.Get();
@@ -740,12 +772,20 @@ namespace raintk
             }
         }
 
+        float y_shift = 0.0f;
+
+        if(height_calc.Get() == HeightCalc::GlyphBounds)
+        {
+            y_shift = list_lines.front().y_max-baseline_y;
+        }
+
         std::array<float,4> list_alignment_shifts;
+
 
         for(auto const &line : list_lines)
         {
             // Calculate alignment shifts
-            list_alignment_shifts[1] = 0.0f; // Left
+            list_alignment_shifts[1] = 0.0f-line.x_min; // Left
             list_alignment_shifts[2] = text_width-line.x_max; // Right
             list_alignment_shifts[3] = list_alignment_shifts[2]*0.5f; // Center
 
@@ -775,8 +815,13 @@ namespace raintk
 
                 float x0 = (glyph.x0-glyph.sdf_x + alignment_shift)*k_glyph;
                 float x1 = (glyph.x1+glyph.sdf_x + alignment_shift)*k_glyph;
-                float y0 = (baseline_y-(glyph.y0-glyph.sdf_y))*k_glyph;
-                float y1 = (baseline_y-(glyph.y1+glyph.sdf_y))*k_glyph;
+                float y0 = (baseline_y-(glyph.y0-glyph.sdf_y) + y_shift)*k_glyph;
+                float y1 = (baseline_y-(glyph.y1+glyph.sdf_y) + y_shift)*k_glyph;
+
+//                float x0 = (glyph.x0 + alignment_shift)*k_glyph;
+//                float x1 = (glyph.x1 + alignment_shift)*k_glyph;
+//                float y0 = (baseline_y-(glyph.y0))*k_glyph;
+//                float y1 = (baseline_y-(glyph.y1))*k_glyph;
 
                 float s0 = glyph.tex_x*k_div_atlas;
                 float s1 = (glyph.tex_x+glyph_width)*k_div_atlas;
