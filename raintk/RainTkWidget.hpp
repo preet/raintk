@@ -25,6 +25,14 @@
 #include <raintk/RainTkComponents.hpp>
 #include <raintk/RainTkUnits.hpp>
 
+namespace ks
+{
+    namespace gui
+    {
+        struct KeyEvent;
+    }
+}
+
 namespace raintk
 {
     // ============================================================= //
@@ -54,6 +62,7 @@ namespace raintk
         using ListChildren = std::unordered_set<shared_ptr<Widget>>;
 
         friend class TransformSystem;
+        friend class InputListener;
 
         // Only the Scene should be able to create a root widget
         class RootWidgetKey {
@@ -163,6 +172,10 @@ namespace raintk
             1.0f
         };
 
+        Property<bool> input_focus{
+            false
+        };
+
         // signal that is emitted from within the
         // destructor of this Widget
         ks::Signal<Widget*> signal_destroying_widget;
@@ -177,10 +190,14 @@ namespace raintk
         virtual void onScaleChanged();
         virtual void onOriginChanged();
         virtual void onClipChanged();
+        virtual void onInputFocusChanged();
 
         virtual void onClipIdUpdated();
         virtual void onTransformUpdated();
         virtual void onAccOpacityUpdated();
+
+        virtual void handleKeyboardInput(ks::gui::KeyEvent const &key_event);
+        virtual void handleUTF8Input(std::string const &utf8text);
 
         virtual void update();
 
@@ -202,6 +219,7 @@ namespace raintk
         Id m_cid_origin;
         Id m_cid_clip;
         Id m_cid_opacity;
+        Id m_cid_input_focus;
 
         Id m_clip_id;
 

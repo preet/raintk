@@ -334,6 +334,16 @@ namespace raintk
         return m_list_input_areas_by_depth;
     }
 
+    void InputSystem::SetInputFocus(shared_ptr<Widget> const &focus_widget)
+    {
+        m_input_listener->SetInputFocus(focus_widget);
+    }
+
+    void InputSystem::ClearInputFocus()
+    {
+        m_input_listener->ClearInputFocus();
+    }
+
     void InputSystem::StartInputRecording(std::string const &file_name)
     {
         m_input_recorder = nullptr;

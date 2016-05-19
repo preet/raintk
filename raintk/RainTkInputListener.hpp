@@ -61,11 +61,19 @@ namespace raintk
         GetInputs(TimePoint const &prev_upd_time,
                   TimePoint const &curr_upd_time);
 
+
+        // Set the widget that receives non-area inputs
+        void SetInputFocus(shared_ptr<Widget> const &focus_widget);
+        void ClearInputFocus();
+
     private:
         void onAppResume();
         void onMouseEvent(ks::gui::MouseEvent mouse_event);
         void onTouchEvent(ks::gui::TouchEvent touch_event);
 
+        // These are pass through events
+        void onKeyEvent(ks::gui::KeyEvent key_event);
+        void onUTF8Input(std::string utf8text);
 
         static void trimHistoryBeforeFrame(
                 std::vector<HistoryPoint>& input_history,
@@ -101,5 +109,7 @@ namespace raintk
         std::vector<std::vector<HistoryPoint>> m_lkup_input_history;
         std::vector<std::vector<Frame>> m_lkup_input_frames;
 
+        // widget with current input focus for non area inputs
+        shared_ptr<Widget> m_focus_widget;
     };
 }

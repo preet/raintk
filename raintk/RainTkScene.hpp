@@ -148,6 +148,7 @@ namespace raintk
 
         // Root widget
         shared_ptr<Widget> m_root_widget;
+        shared_ptr<Widget> m_focus_widget;
 
         // Draw stage
         Id m_main_draw_stage_id;

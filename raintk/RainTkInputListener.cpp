@@ -65,8 +65,8 @@ namespace raintk
         m_input_buffer_size(6),
         m_input_buffer_delay(2),
         m_frame(0),
-        m_lkup_input_frames(static_cast<uint>(InputType::TypeCount)),
-        m_lkup_input_history(static_cast<uint>(InputType::TypeCount))
+        m_lkup_input_history(static_cast<uint>(InputType::TypeCount)),
+        m_lkup_input_frames(static_cast<uint>(InputType::TypeCount))
     {
         m_lkup_input_frames[static_cast<uint>(InputType::Mouse)].resize(m_input_buffer_size);
         m_lkup_input_frames[static_cast<uint>(InputType::Touch0)].resize(m_input_buffer_size);
@@ -85,6 +85,16 @@ namespace raintk
         m_app->signal_touch_input->Connect(
                     this_listener,
                     &InputListener::onTouchEvent,
+                    ks::ConnectionType::Direct);
+
+        m_app->signal_keyboard_input->Connect(
+                    this_listener,
+                    &InputListener::onKeyEvent,
+                    ks::ConnectionType::Direct);
+
+        m_app->signal_utf8_input->Connect(
+                    this_listener,
+                    &InputListener::onUTF8Input,
                     ks::ConnectionType::Direct);
 
         m_app->signal_resume.Connect(
@@ -168,6 +178,24 @@ namespace raintk
         return list_all_points;
     }
 
+    void InputListener::SetInputFocus(shared_ptr<Widget> const &focus_widget)
+    {
+        if(m_focus_widget)
+        {
+            m_focus_widget->input_focus = false;
+        }
+        m_focus_widget = focus_widget;
+    }
+
+    void InputListener::ClearInputFocus()
+    {
+        if(m_focus_widget)
+        {
+            m_focus_widget->input_focus = false;
+            m_focus_widget = nullptr;
+        }
+    }
+
     void InputListener::onAppResume()
     {
         rtklog.Trace() << "InputSystem On App Resume";
@@ -205,6 +233,22 @@ namespace raintk
         input_history.emplace_back();
         input_history.back().frame_num = m_frame;
         input_history.back().point = ConvertToInputPoint(touch_event);
+    }
+
+    void InputListener::onKeyEvent(ks::gui::KeyEvent key_event)
+    {
+        if(m_focus_widget)
+        {
+            m_focus_widget->handleKeyboardInput(key_event);
+        }
+    }
+
+    void InputListener::onUTF8Input(std::string utf8text)
+    {
+        if(m_focus_widget)
+        {
+            m_focus_widget->handleUTF8Input(utf8text);
+        }
     }
 
     void InputListener::trimHistoryBeforeFrame(

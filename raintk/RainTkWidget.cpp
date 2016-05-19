@@ -17,6 +17,7 @@
 #include <raintk/RainTkWidget.hpp>
 #include <raintk/RainTkScene.hpp>
 #include <raintk/RainTkTransformSystem.hpp>
+#include <raintk/RainTkInputSystem.hpp>
 
 #include <raintk/thirdparty/pnpoly.hpp>
 
@@ -163,6 +164,12 @@ namespace raintk
 //                    this_widget,
 //                    &Widget::onOpacityChanged,
 //                    ks::ConnectionType::Direct);
+
+        m_cid_input_focus =
+                input_focus.signal_changed.Connect(
+                    this_widget,
+                    &Widget::onInputFocusChanged,
+                    ks::ConnectionType::Direct);
     }
 
     Widget::~Widget()
@@ -431,6 +438,18 @@ namespace raintk
         upd_data.update |= UpdateData::UpdateClip;
     }
 
+    void Widget::onInputFocusChanged()
+    {
+        if(input_focus.Get())
+        {
+            shared_ptr<Widget> this_widget =
+                    std::static_pointer_cast<Widget>(
+                        shared_from_this());
+
+            m_scene->GetInputSystem()->SetInputFocus(this_widget);
+        }
+    }
+
     void Widget::onClipIdUpdated()
     {
         // Do nothing for base widget
@@ -442,6 +461,16 @@ namespace raintk
     }
 
     void Widget::onAccOpacityUpdated()
+    {
+        // Do nothing for base widget
+    }
+
+    void Widget::handleKeyboardInput(ks::gui::KeyEvent const &key_event)
+    {
+        // Do nothing for base widget
+    }
+
+    void Widget::handleUTF8Input(std::string const &utf8text)
     {
         // Do nothing for base widget
     }

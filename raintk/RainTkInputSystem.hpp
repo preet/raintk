@@ -57,6 +57,9 @@ namespace raintk
         std::vector<std::pair<float,InputArea*>> const &
         GetInputAreasByDepth() const;
 
+        void SetInputFocus(shared_ptr<Widget> const &focus_widget);
+        void ClearInputFocus();
+
         void StartInputRecording(std::string const &file_name);
         void StopInputRecording();
 
@@ -64,6 +67,8 @@ namespace raintk
         void StopInputPlayback();
 
     private:
+
+
         Scene* const m_scene;
         ks::gui::Application* const m_app;
         uint m_inputable_mask;
