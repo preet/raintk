@@ -79,6 +79,11 @@ int main(int argc, char* argv[])
                 return t;
             };
 
+    // Empty text
+    {
+        make_text();
+    }
+
     // Single line
     {
         auto label = make_text();

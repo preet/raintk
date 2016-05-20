@@ -201,7 +201,8 @@ namespace raintk
         DrawableWidget(key,scene,parent),
         m_cmlist_draw_data(
             m_scene->GetDrawSystem()->
-            GetDrawDataComponentList())
+            GetDrawDataComponentList()),
+        m_keep_glyph_data(false)
     {
         m_nz_glyph_tl.a_v2_position.x = 0;
         m_nz_glyph_tl.a_v2_position.y = 0;
@@ -272,6 +273,21 @@ namespace raintk
     ks::text::Hint& Text::GetTextHint()
     {
         return m_text_hint;
+    }
+
+    std::u16string const &Text::GetUTF16Text() const
+    {
+        return m_u16_text;
+    }
+
+    std::vector<ks::text::Line> const * Text::GetGlyphData() const
+    {
+        return m_list_lines.get();
+    }
+
+    void Text::SetKeepGlyphData(bool enabled)
+    {
+        m_keep_glyph_data = enabled;
     }
 
     void Text::onColorChanged()
@@ -372,69 +388,80 @@ namespace raintk
     {
         // Calculate dimensions
 
-        // The max line width must be scaled by the
-        // size of the text but watch out for the
-        // float->uint cast overflow
-        float scaled_line_width =
-                line_width.Get()*
-                (m_scene->GetTextGlyphSizePx()/size.Get());
-
-        if(scaled_line_width < float(k_max_line_width))
+        if(!text.Get().empty())
         {
-            m_text_hint.max_line_width_px =
-                    uint(scaled_line_width);
-        }
+            // The max line width must be scaled by the
+            // size of the text but watch out for the
+            // float->uint cast overflow
+            float scaled_line_width =
+                    line_width.Get()*
+                    (m_scene->GetTextGlyphSizePx()/size.Get());
 
-        // Get/generate the glyphs from the TextManager
-        m_list_lines =
-                m_scene->GetTextManager()->GetGlyphs(
-                    m_u16_text,
-                    m_text_hint);
+            if(scaled_line_width < float(k_max_line_width))
+            {
+                m_text_hint.max_line_width_px =
+                        uint(scaled_line_width);
+            }
 
-        auto& list_lines = *m_list_lines;
+            // Get/generate the glyphs from the TextManager
+            m_list_lines =
+                    m_scene->GetTextManager()->GetGlyphs(
+                        m_u16_text,
+                        m_text_hint);
 
-        float new_height = 0.0f;
-        float new_width = 0.0f;
+            auto& list_lines = *m_list_lines;
 
-        // The first baseline is 'ascent' pixels below the top
-        float baseline_top = list_lines.front().ascent;
-        float baseline_bottom = baseline_top;
+            float new_height = 0.0f;
+            float new_width = 0.0f;
 
-        for(auto const &line : list_lines)
-        {
-            new_width = std::max<float>(new_width,line.x_max-line.x_min);
-            baseline_bottom += line.spacing;
-        }
+            // The first baseline is 'ascent' pixels below the top
+            float baseline_top = list_lines.front().ascent;
+            float baseline_bottom = baseline_top;
 
-        baseline_bottom -= list_lines.back().spacing;
+            for(auto const &line : list_lines)
+            {
+                new_width = std::max<float>(new_width,line.x_max-line.x_min);
+                baseline_bottom += line.spacing;
+            }
 
-        if(height_calc.Get() == HeightCalc::GlyphBounds)
-        {
-            // Height representing the bounds of the contained glyphs
-            new_height =
-                    baseline_bottom-
-                    list_lines.back().y_min-
-                    list_lines.front().ascent+
-                    list_lines.front().y_max;
+            baseline_bottom -= list_lines.back().spacing;
+
+            if(height_calc.Get() == HeightCalc::GlyphBounds)
+            {
+                // Height representing the bounds of the contained glyphs
+                new_height =
+                        baseline_bottom-
+                        list_lines.back().y_min-
+                        list_lines.front().ascent+
+                        list_lines.front().y_max;
+            }
+            else
+            {
+                // Height considering the font dimensions
+                new_height =
+                        baseline_bottom +
+                        abs(list_lines.back().descent);
+            }
+
+            float const k_scale =
+                    size.Get()/m_scene->GetTextGlyphSizePx();
+
+            height = (new_height*k_scale);
+            width = (new_width*k_scale);
         }
         else
         {
-            // Height considering the font dimensions
-            new_height =
-                    baseline_bottom +
-                    abs(list_lines.back().descent);
+            height = 0.0f;
+            width = 0.0f;
         }
-
-        float const k_scale =
-                size.Get()/m_scene->GetTextGlyphSizePx();
-
-        this->height = (new_height*k_scale);
-        this->width = (new_width*k_scale);
 
         // Indicate drawables must be updated
         m_upd_recreate = true;
         auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
         upd_data.update |= UpdateData::UpdateDrawables;
+
+        // Indicate glyphs were updated
+        signal_glyph_data_changed.Emit();
     }
 
     // Should only be called from createDrawables/removeDrawables
@@ -484,6 +511,8 @@ namespace raintk
                     m_scene->GetTextManager()->GetGlyphs(
                         m_u16_text,
                         m_text_hint);
+
+            signal_glyph_data_changed.Emit();
         }
 
         auto& list_lines = *m_list_lines;
@@ -613,7 +642,11 @@ namespace raintk
         m_upd_xf = false;
         m_upd_color = false;
 
-        m_list_lines = nullptr;
+        if(!m_keep_glyph_data)
+        {
+            m_list_lines = nullptr;
+            signal_glyph_data_changed.Emit();
+        }
     }
 
     void Text::destroyDrawables()
@@ -626,7 +659,11 @@ namespace raintk
         if(m_upd_recreate)
         {
             destroyDrawables();
-            createDrawables();
+
+            if(!text.Get().empty())
+            {
+                createDrawables();
+            }
         }
         else
         {
@@ -817,11 +854,6 @@ namespace raintk
                 float x1 = (glyph.x1+glyph.sdf_x + alignment_shift)*k_glyph;
                 float y0 = (baseline_y-(glyph.y0-glyph.sdf_y) + y_shift)*k_glyph;
                 float y1 = (baseline_y-(glyph.y1+glyph.sdf_y) + y_shift)*k_glyph;
-
-//                float x0 = (glyph.x0 + alignment_shift)*k_glyph;
-//                float x1 = (glyph.x1 + alignment_shift)*k_glyph;
-//                float y0 = (baseline_y-(glyph.y0))*k_glyph;
-//                float y1 = (baseline_y-(glyph.y1))*k_glyph;
 
                 float s0 = glyph.tex_x*k_div_atlas;
                 float s1 = (glyph.tex_x+glyph_width)*k_div_atlas;

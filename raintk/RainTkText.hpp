@@ -113,7 +113,12 @@ namespace raintk
         ~Text();
 
         ks::text::Hint& GetTextHint();
+        std::u16string const &GetUTF16Text() const;
+        std::vector<ks::text::Line> const * GetGlyphData() const;
 
+        // Keeps glyph data around even after it has been
+        // used to create drawables.
+        void SetKeepGlyphData(bool enabled);
 
         // Properties
         Property<glm::u8vec4> color {
@@ -144,6 +149,9 @@ namespace raintk
             HeightCalc::GlyphBounds
         };
 
+
+        // Signals
+        ks::Signal<> signal_glyph_data_changed;
 
     private:
         void onColorChanged();
@@ -201,6 +209,8 @@ namespace raintk
         text_detail::Vertex m_nz_glyph_br;
 
         std::unique_ptr<std::vector<ks::text::Line>> m_list_lines;
+
+        bool m_keep_glyph_data;
     };
 
     // ============================================================= //
