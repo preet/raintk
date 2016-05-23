@@ -842,7 +842,7 @@ namespace raintk
 
                 // Do I really need this check? Would it be
                 // cheaper to leave it out?
-                if(o_glyph_width==0 || o_glyph_height==0)
+                if(o_glyph_width==0 && o_glyph_height==0)
                 {
                     continue;
                 }
