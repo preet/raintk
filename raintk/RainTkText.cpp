@@ -36,7 +36,8 @@ namespace raintk
 
         ks::gl::VertexLayout const g_vx_layout {
             { "a_v2_position", AttrType::Float, 2, false },
-            { "a_v3_tex0_index", AttrType::Float, 3, false }
+            { "a_v2_tex0", AttrType::Float, 2, false },
+            { "a_v2_highlight_index", AttrType::UShort, 2, false}
         };
 
         shared_ptr<GeometryLayout> g_geometry_layout(
@@ -70,7 +71,7 @@ namespace raintk
         }
 
         // The length of each UniformArray in a given batch
-        uint const k_batch_array_size=16;
+        uint const k_batch_array_size=12;
 
 
         std::map<Id,std::vector<GlyphBatchAvail>> g_lkup_glyph_batch_avail;
@@ -97,6 +98,13 @@ namespace raintk
             text_batch.uniform_set->list_uniforms.push_back(
                         make_shared<ks::gl::UniformArray<glm::vec4>>(
                             "u_array_v4_color",
+                            std::vector<glm::vec4>(k_batch_array_size)
+                            )
+                        );
+
+            text_batch.uniform_set->list_uniforms.push_back(
+                        make_shared<ks::gl::UniformArray<glm::vec4>>(
+                            "u_array_v4_highlight_color",
                             std::vector<glm::vec4>(k_batch_array_size)
                             )
                         );
@@ -228,6 +236,12 @@ namespace raintk
                     &Text::onColorChanged,
                     ks::ConnectionType::Direct);
 
+        m_cid_highlight_color =
+                highlight_color.signal_changed.Connect(
+                    this_text,
+                    &Text::onHighlightColorChanged,
+                    ks::ConnectionType::Direct);
+
         m_cid_text =
                 text.signal_changed.Connect(
                     this_text,
@@ -290,7 +304,25 @@ namespace raintk
         m_keep_glyph_data = enabled;
     }
 
+    void Text::SetHighlightedText(std::vector<uint> const &utf16_indices)
+    {
+        m_utf16_highlight = utf16_indices;
+
+        m_upd_highlight = true;
+
+        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
+        upd_data.update |= UpdateData::UpdateDrawables;
+    }
+
     void Text::onColorChanged()
+    {
+        m_upd_color = true;
+
+        auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
+        upd_data.update |= UpdateData::UpdateDrawables;
+    }
+
+    void Text::onHighlightColorChanged()
     {
         m_upd_color = true;
 
@@ -301,6 +333,7 @@ namespace raintk
     void Text::onTextChanged()
     {
         m_u16_text = ks::text::TextManager::ConvertStringUTF8ToUTF16(text.Get());
+        m_utf16_highlight.clear();
 
         auto& upd_data = m_cmlist_update_data->GetComponent(m_entity_id);
         upd_data.update |= UpdateData::UpdateWidget;
@@ -638,9 +671,11 @@ namespace raintk
 
         updateTransformUniforms();
         updateColorUniforms();
+        updateHighlight();
 
         m_upd_xf = false;
         m_upd_color = false;
+        m_upd_highlight = false;
 
         if(!m_keep_glyph_data)
         {
@@ -676,36 +711,66 @@ namespace raintk
             {
                 updateColorUniforms();
             }
+
+            if(m_upd_highlight)
+            {
+                updateHighlight();
+            }
         }
 
         m_upd_recreate = false;
         m_upd_xf = false;
         m_upd_color = false;
+        m_upd_highlight = false;
     }
 
     void Text::updateColorUniforms()
     {
+        float const k_to_fp = 1.0f/255.0f;
+
+        // normal color
+        auto const &this_color = color.Get();
+
+        float final_color_opacity =
+                (this_color.a*k_to_fp)*
+                m_accumulated_opacity;
+
+        glm::vec4 const color_norm(
+                    this_color.r*k_to_fp*final_color_opacity,
+                    this_color.g*k_to_fp*final_color_opacity,
+                    this_color.b*k_to_fp*final_color_opacity,
+                    final_color_opacity);
+
+        // highlight color
+        auto const &this_highlight_color = highlight_color.Get();
+
+        float final_highlight_opacity =
+                (this_highlight_color.a*k_to_fp)*
+                m_accumulated_opacity;
+
+        glm::vec4 const highlight_norm(
+                    this_highlight_color.r*k_to_fp*final_highlight_opacity,
+                    this_highlight_color.g*k_to_fp*final_highlight_opacity,
+                    this_highlight_color.b*k_to_fp*final_highlight_opacity,
+                    final_highlight_opacity);
+
+
         for(auto &batch : m_list_glyph_batches)
         {
-            auto const &this_color = color.Get();
-
-            float const k_to_fp = 1.0f/255.0f;
-            float const final_opacity =
-                    (this_color.a*k_to_fp)*
-                    m_accumulated_opacity;
-
-            glm::vec4 const color_norm(
-                        this_color.r*k_to_fp*final_opacity,
-                        this_color.g*k_to_fp*final_opacity,
-                        this_color.b*k_to_fp*final_opacity,
-                        final_opacity);
-
             auto u_array_v4_color =
                     static_cast<ks::gl::UniformArray<glm::vec4>*>(
                         batch.uniform_set->list_uniforms[1].get());
 
             u_array_v4_color->Update(
                         color_norm,
+                        batch.index);
+
+            auto u_array_v4_highlight_color =
+                    static_cast<ks::gl::UniformArray<glm::vec4>*>(
+                        batch.uniform_set->list_uniforms[2].get());
+
+            u_array_v4_highlight_color->Update(
+                        highlight_norm,
                         batch.index);
         }
     }
@@ -752,17 +817,55 @@ namespace raintk
                         world_glyph_tl.x;
 
                 float tex_coord_width =
-                        m_nz_glyph_br.a_v3_tex0_index.x -
-                        m_nz_glyph_tl.a_v3_tex0_index.x;
+                        m_nz_glyph_br.a_v2_tex0.x -
+                        m_nz_glyph_tl.a_v2_tex0.x;
 
                 res = tex_coord_width/glyph_width_px;
             }
 
             auto u_array_f_res =
                     static_cast<ks::gl::UniformArray<float>*>(
-                        batch.uniform_set->list_uniforms[2].get());
+                        batch.uniform_set->list_uniforms[3].get());
 
             u_array_f_res->Update(res,batch.index);
+        }
+    }
+
+    void Text::updateHighlight()
+    {
+        // Unhighlight everything first
+        for(auto& batch : m_list_glyph_batches)
+        {
+            auto& draw_data =
+                    m_cmlist_draw_data->
+                    GetComponent(batch.entity_id);
+
+            Vertex* vx_buffer = reinterpret_cast<Vertex*>(
+                        &(draw_data.vx_buffer->front()));
+
+            uint vx_count = draw_data.vx_buffer->size()/sizeof(Vertex);
+
+            for(uint i=0; i < vx_count; i++)
+            {
+                vx_buffer[i].a_v2_highlight_index.x = 0;
+            }
+        }
+
+        // Highlight the required glyphs
+        for(auto utf16_index : m_utf16_highlight)
+        {
+            auto& buff_vx = m_lkup_utf16_vertex[utf16_index];
+
+            auto& vx_buffer = *(buff_vx.first);
+
+            Vertex* glyph_vertices =
+                    reinterpret_cast<Vertex*>(
+                        &(vx_buffer[buff_vx.second]));
+
+            for(uint i=0; i < 6; i++)
+            {
+                glyph_vertices[i].a_v2_highlight_index.x = 1;
+            }
         }
     }
 
@@ -818,6 +921,8 @@ namespace raintk
 
         std::array<float,4> list_alignment_shifts;
 
+        m_lkup_utf16_vertex.clear();
+        m_lkup_utf16_vertex.resize(m_u16_text.size(),{nullptr,0});
 
         for(auto const &line : list_lines)
         {
@@ -866,12 +971,16 @@ namespace raintk
                         static_cast<float>(
                             list_glyph_batches[glyph.atlas]->index);
 
+                m_lkup_utf16_vertex[glyph.cluster] =
+                    {list_vx.get(), (list_vx->size())};
+
                 // BL
                 ks::gl::Buffer::PushElement<Vertex>(
                             *list_vx,
                             Vertex{
                                 glm::vec2{x0,y0},
-                                glm::vec3{s0,t1,uniform_index}
+                                glm::vec2{s0,t1},
+                                glm::u16vec2{0,uniform_index},
                             });
 
                 // TR
@@ -879,7 +988,8 @@ namespace raintk
                             *list_vx,
                             Vertex{
                                 glm::vec2{x1,y1},
-                                glm::vec3{s1,t0,uniform_index}
+                                glm::vec2{s1,t0},
+                                glm::u16vec2{0,uniform_index},
                             });
 
                 // TL
@@ -887,7 +997,8 @@ namespace raintk
                             *list_vx,
                             Vertex{
                                 glm::vec2{x0,y1},
-                                glm::vec3{s0,t0,uniform_index}
+                                glm::vec2{s0,t0},
+                                glm::u16vec2{0,uniform_index},
                             });
 
                 // BL
@@ -895,7 +1006,8 @@ namespace raintk
                             *list_vx,
                             Vertex{
                                 glm::vec2{x0,y0},
-                                glm::vec3{s0,t1,uniform_index}
+                                glm::vec2{s0,t1},
+                                glm::u16vec2{0,uniform_index}
                             });
 
                 // BR
@@ -903,7 +1015,8 @@ namespace raintk
                             *list_vx,
                             Vertex{
                                 glm::vec2{x1,y0},
-                                glm::vec3{s1,t1,uniform_index}
+                                glm::vec2{s1,t1},
+                                glm::u16vec2{0,uniform_index}
                             });
 
                 // TR
@@ -911,7 +1024,8 @@ namespace raintk
                             *list_vx,
                             Vertex{
                                 glm::vec2{x1,y1},
-                                glm::vec3{s1,t0,uniform_index}
+                                glm::vec2{s1,t0},
+                                glm::u16vec2{0,uniform_index}
                             });
             }
 
@@ -965,13 +1079,15 @@ namespace raintk
                 m_nz_glyph_tl =
                         Vertex{
                             glm::vec2{x0,y1},
-                            glm::vec3{s0,t0,0}
+                            glm::vec2{s0,t0},
+                            glm::u16vec2{0,0}
                         };
 
                 m_nz_glyph_br =
                         Vertex{
                             glm::vec2{x1,y0},
-                            glm::vec3{s1,t1,0}
+                            glm::vec2{s1,t1},
+                            glm::u16vec2{0,0}
                         };
 
                 return;

@@ -62,11 +62,13 @@ namespace raintk
         struct Vertex
         {
             glm::vec2 a_v2_position; // 8
+            glm::vec2 a_v2_tex0; // 8
 
-            // Components [0] and [1] contain the x,y texture
-            // coordinates. [2] contains an index into a uniform
-            // array containing transform and color information.
-            glm::vec3 a_v3_tex0_index; // 12
+            // [1] contains a value indicating whether or not
+            //     the highlight color should be used (0 or 1)
+            // [2] contains the index into a uniform array containing
+            //     transform and color information
+            glm::u16vec2 a_v2_highlight_index; // 4
         };
     }
 
@@ -120,9 +122,17 @@ namespace raintk
         // used to create drawables.
         void SetKeepGlyphData(bool enabled);
 
+        // Sets the list of characters to render with highlight_color
+        void SetHighlightedText(std::vector<uint> const &utf16_indices);
+
+
         // Properties
         Property<glm::u8vec4> color {
             glm::u8vec4{51,51,51,255}
+        };
+
+        Property<glm::u8vec4> highlight_color {
+            glm::u8vec4{50,150,250,255}
         };
 
         Property<std::string> text {
@@ -155,6 +165,7 @@ namespace raintk
 
     private:
         void onColorChanged();
+        void onHighlightColorChanged();
         void onTextChanged();
         void onFontChanged();
         void onSizeChanged();
@@ -173,6 +184,7 @@ namespace raintk
         void acquireBatches();
         void updateColorUniforms();
         void updateTransformUniforms();
+        void updateHighlight();
 
         void genGlyphVertexBuffers(
                 std::vector<ks::text::Line> const &list_lines,
@@ -187,6 +199,7 @@ namespace raintk
         DrawDataComponentList* const m_cmlist_draw_data;
 
         Id m_cid_color;
+        Id m_cid_highlight_color;
         Id m_cid_text;
         Id m_cid_font;
         Id m_cid_size;
@@ -197,10 +210,13 @@ namespace raintk
         bool m_upd_recreate{false};
         bool m_upd_xf{false};
         bool m_upd_color{false};
+        bool m_upd_highlight{false};
 
         std::u16string m_u16_text;
         ks::text::Hint m_text_hint;
         std::vector<text_detail::GlyphBatch> m_list_glyph_batches;
+        std::vector<std::pair<std::vector<u8>*,uint>> m_lkup_utf16_vertex;
+        std::vector<uint> m_utf16_highlight;
 
         // Vertices for the bounds of a single Non-zero glyph
         // if it exists (width and height are 0 if they are

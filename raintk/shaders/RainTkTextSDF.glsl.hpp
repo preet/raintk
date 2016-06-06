@@ -15,12 +15,14 @@ std::string const text_sdf_vert_glsl = R"___DELIM___(
 
 // attributes
 attribute vec4 a_v2_position;
-attribute vec3 a_v3_tex0_index;
+attribute vec2 a_v2_tex0;
+attribute vec2 a_v2_highlight_index;
 
 // uniforms
 uniform mat4 u_m4_pv; // proj*view
 uniform mat4 u_array_m4_model[K_NUM_U_ARRAY_SIZE];
 uniform vec4 u_array_v4_color[K_NUM_U_ARRAY_SIZE];
+uniform vec4 u_array_v4_highlight_color[K_NUM_U_ARRAY_SIZE];
 uniform float u_array_f_res[K_NUM_U_ARRAY_SIZE];
 
 // varyings
@@ -30,10 +32,15 @@ varying highp float v_f_res;
 
 void main()
 {
-    int index = int(a_v3_tex0_index.z);
+    int highlight = int(a_v2_highlight_index.x);
+    int index = int(a_v2_highlight_index.y);
 
-    v_v2_tex0_uv = vec2(a_v3_tex0_index.xy);
-    v_v4_color = u_array_v4_color[index];
+    v_v2_tex0_uv = a_v2_tex0;
+
+    v_v4_color =
+            (1-highlight)*u_array_v4_color[index] +
+            (highlight)*u_array_v4_highlight_color[index];
+
     v_f_res = u_array_f_res[index];
     mat4 model_xf = u_array_m4_model[index];
 

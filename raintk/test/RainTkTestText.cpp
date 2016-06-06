@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
     (void)argc;
     (void)argv;
 
-    TestContext c;
+    TestContext c(600,400);
 
     // Set colors
     glm::u8vec4 color_bg{25,25,25,255};
@@ -122,6 +122,18 @@ int main(int argc, char* argv[])
         label->text = "and this text shows\n right alignment";
         label->alignment = raintk::Text::Alignment::Right;
     }
+
+    // Highlight
+    {
+        auto label = make_text();
+        label->text = "This text shows highlighting for individual characters";
+        label->line_width = divider->x.Get() - raintk::mm(3.0);
+        label->SetHighlightedText(
+                    std::vector<uint>{
+                        5,6,7,8,16,17,18,19,20,21,22,23,24,25,26,27,33,35,37,39,41,43
+                    });
+    }
+
 
 
     // Right Column
