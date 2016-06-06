@@ -789,8 +789,8 @@ namespace raintk
 
         for(auto const &line : list_lines)
         {
-            text_x_min = std::min<uint>(text_x_min,line.x_min);
-            text_x_max = std::max<uint>(text_x_max,line.x_max);
+            text_x_min = std::min<sint>(text_x_min,line.x_min);
+            text_x_max = std::max<sint>(text_x_max,line.x_max);
         }
 
         text_width = text_x_max-text_x_min;
