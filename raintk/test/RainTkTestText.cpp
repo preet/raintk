@@ -124,11 +124,11 @@ int main(int argc, char* argv[])
     }
 
     // Highlight
+    auto highlight_label = make_text();
     {
-        auto label = make_text();
-        label->text = "This text shows highlighting for individual characters";
-        label->line_width = divider->x.Get() - raintk::mm(3.0);
-        label->SetHighlightedText(
+        highlight_label->text = "This text shows highlighting for individual characters";
+        highlight_label->line_width = divider->x.Get() - raintk::mm(3.0);
+        highlight_label->SetHighlightedText(
                     std::vector<uint>{
                         5,6,7,8,16,17,18,19,20,21,22,23,24,25,26,27,33,35,37,39,41,43
                     });
@@ -182,6 +182,21 @@ int main(int argc, char* argv[])
                         label->text = ks::ToString(i)+". A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
                         label->opacity = std::min(1.0f,i*0.05f + 0.1f);
                         list_right_column_text.push_back(label);
+                    }
+
+                    if(text_item_count_idx%2==0)
+                    {
+                        highlight_label->SetHighlightedText(
+                                    std::vector<uint>{
+                                        16,17,18,19,20,21,22,23,24,25,26,27
+                                    });
+                    }
+                    else
+                    {
+                        highlight_label->SetHighlightedText(
+                                    std::vector<uint>{
+                                        5,6,7,8,16,17,18,19,20,21,22,23,24,25,26,27,33,35,37,39,41,43
+                                    });
                     }
 
                     text_item_count_idx++;

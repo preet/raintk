@@ -128,7 +128,7 @@ namespace raintk
 
         // Properties
         Property<glm::u8vec4> color {
-            glm::u8vec4{51,51,51,255}
+            glm::u8vec4{111,111,111,255}
         };
 
         Property<glm::u8vec4> highlight_color {
