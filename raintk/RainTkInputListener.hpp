@@ -62,6 +62,8 @@ namespace raintk
                   TimePoint const &curr_upd_time);
 
 
+        shared_ptr<Widget> GetWidgetWithInputFocus() const;
+
         // Set the widget that receives non-area inputs
         void SetInputFocus(shared_ptr<Widget> const &focus_widget);
         void ClearInputFocus();
@@ -110,6 +112,6 @@ namespace raintk
         std::vector<std::vector<Frame>> m_lkup_input_frames;
 
         // widget with current input focus for non area inputs
-        shared_ptr<Widget> m_focus_widget;
+        weak_ptr<Widget> m_focus_widget;
     };
 }

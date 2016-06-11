@@ -440,13 +440,22 @@ namespace raintk
 
     void Widget::onInputFocusChanged()
     {
+        shared_ptr<Widget> this_widget =
+                std::static_pointer_cast<Widget>(
+                    shared_from_this());
+
+        auto input_system = m_scene->GetInputSystem();
+
         if(input_focus.Get())
         {
-            shared_ptr<Widget> this_widget =
-                    std::static_pointer_cast<Widget>(
-                        shared_from_this());
-
-            m_scene->GetInputSystem()->SetInputFocus(this_widget);
+            input_system->SetInputFocus(this_widget);
+        }
+        else
+        {
+            if(this_widget == input_system->GetWidgetWithInputFocus())
+            {
+                input_system->ClearInputFocus();
+            }
         }
     }
 

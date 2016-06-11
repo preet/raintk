@@ -57,6 +57,11 @@ namespace raintk
         std::vector<std::pair<float,InputArea*>> const &
         GetInputAreasByDepth() const;
 
+        shared_ptr<Widget> GetWidgetWithInputFocus() const;
+
+        // * Set which Widget has Input focus or clear it
+        // * Should only ever be called by Widget, users should
+        //   use the widget->input_focus property instead
         void SetInputFocus(shared_ptr<Widget> const &focus_widget);
         void ClearInputFocus();
 

@@ -178,21 +178,30 @@ namespace raintk
         return list_all_points;
     }
 
-    void InputListener::SetInputFocus(shared_ptr<Widget> const &focus_widget)
+    shared_ptr<Widget> InputListener::GetWidgetWithInputFocus() const
     {
-        if(m_focus_widget)
+        return m_focus_widget.lock();
+    }
+
+    void InputListener::SetInputFocus(shared_ptr<Widget> const &new_focus_widget)
+    {
+        auto curr_focus_widget = m_focus_widget.lock();
+
+        if(curr_focus_widget &&
+           curr_focus_widget != new_focus_widget)
         {
-            m_focus_widget->input_focus = false;
+            curr_focus_widget->input_focus = false;
         }
-        m_focus_widget = focus_widget;
+
+        m_focus_widget = new_focus_widget;
     }
 
     void InputListener::ClearInputFocus()
     {
-        if(m_focus_widget)
+        auto curr_focus_widget = m_focus_widget.lock();
+        if(curr_focus_widget)
         {
-            m_focus_widget->input_focus = false;
-            m_focus_widget = nullptr;
+            m_focus_widget.reset();
         }
     }
 
@@ -237,17 +246,21 @@ namespace raintk
 
     void InputListener::onKeyEvent(ks::gui::KeyEvent key_event)
     {
-        if(m_focus_widget)
+        auto focus_widget = m_focus_widget.lock();
+
+        if(focus_widget)
         {
-            m_focus_widget->handleKeyboardInput(key_event);
+            focus_widget->handleKeyboardInput(key_event);
         }
     }
 
     void InputListener::onUTF8Input(std::string utf8text)
     {
-        if(m_focus_widget)
+        auto focus_widget = m_focus_widget.lock();
+
+        if(focus_widget)
         {
-            m_focus_widget->handleUTF8Input(utf8text);
+            focus_widget->handleUTF8Input(utf8text);
         }
     }
 

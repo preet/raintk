@@ -334,6 +334,11 @@ namespace raintk
         return m_list_input_areas_by_depth;
     }
 
+    shared_ptr<Widget> InputSystem::GetWidgetWithInputFocus() const
+    {
+        return m_input_listener->GetWidgetWithInputFocus();
+    }
+
     void InputSystem::SetInputFocus(shared_ptr<Widget> const &focus_widget)
     {
         m_input_listener->SetInputFocus(focus_widget);
