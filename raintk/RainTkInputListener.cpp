@@ -207,7 +207,6 @@ namespace raintk
 
     void InputListener::onAppResume()
     {
-        rtklog.Trace() << "InputSystem On App Resume";
         for(auto& list_input_frames : m_lkup_input_frames)
         {
             list_input_frames.clear();
