@@ -145,13 +145,15 @@ HEADERS += \
     $${PATH_RAINTK}/raintk/RainTkInputArea.hpp \
     $${PATH_RAINTK}/raintk/RainTkSinglePointArea.hpp \
     $${PATH_RAINTK}/raintk/RainTkScrollArea.hpp \
-    $${PATH_RAINTK}/raintk/RainTkScrollBar.hpp
+    $${PATH_RAINTK}/raintk/RainTkScrollBar.hpp \
+    $${PATH_RAINTK}/raintk/RainTkTextInput.hpp
 #    $${PATH_RAINTK}/raintk/RainTkMouseArea.hpp \
 
 SOURCES += \
     $${PATH_RAINTK}/raintk/RainTkInputArea.cpp \
     $${PATH_RAINTK}/raintk/RainTkSinglePointArea.cpp \
-    $${PATH_RAINTK}/raintk/RainTkScrollArea.cpp
+    $${PATH_RAINTK}/raintk/RainTkScrollArea.cpp \
+    $${PATH_RAINTK}/raintk/RainTkTextInput.cpp
 #    $${PATH_RAINTK}/raintk/RainTkMouseArea.cpp \
 
 # widgets (layout)
@@ -199,12 +201,15 @@ SOURCES += \
 #    $${PATH_RAINTK}/raintk/test/RainTkTestScrollAreaInputPassThrough.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestScrollAreaInputPassThrough2.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestText.cpp
+#    $${PATH_RAINTK}/raintk/test/RainTkTestInputFocus.cpp
+    $${PATH_RAINTK}/raintk/test/RainTkTestTextInput.cpp
+#    $${PATH_RAINTK}/raintk/test/RainTkTestTextDims.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestPropertiesAndUpdateOrder.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestUpdateHierarchy.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestAlignment.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestListView.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestDrag.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestImageAtlas.cpp
-    $${PATH_RAINTK}/raintk/test/RainTkTestOpacityHierarchy.cpp
+#    $${PATH_RAINTK}/raintk/test/RainTkTestOpacityHierarchy.cpp
 
 
