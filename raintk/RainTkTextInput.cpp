@@ -134,7 +134,7 @@ namespace raintk
 
         void start() override
         {
-            elapsed_ms = 0.0f;
+            elapsed_ms = 300.0f;
         }
 
         bool update(float delta_ms) override
@@ -187,8 +187,11 @@ namespace raintk
         m_input_text = MakeWidget<Text>(m_scene,m_content_parent);
         m_input_text->SetKeepGlyphData(true);
         m_input_text->height_calc = Text::HeightCalc::FontBounds;
+        m_input_text->x =
+                [this]() {
+                    return cursor_width.Get();
+                };
         m_input_text->z = 0.1f; // So we're above the cursor
-
         m_input_text->signal_glyph_data_changed.Connect(
                     this_text_input,
                     &TextInput::onGlyphDataChanged,
@@ -196,7 +199,7 @@ namespace raintk
 
         m_content_parent->width =
                 [this](){
-                    return m_input_text->width.Get();
+                    return m_input_text->width.Get()+2*cursor_width.Get();
                 };
 
         m_content_parent->height =
@@ -216,7 +219,7 @@ namespace raintk
                     return m_input_text->size.Get();
                 };
 
-        m_cursor->width = 2;
+        m_cursor->width = cursor_width.Get();
 
         Align::BindVCenterToAnchorVCenter(
                     m_cursor.get(),
@@ -250,6 +253,8 @@ namespace raintk
                 ks::MakeObject<TextInputCursorAnim>(
                     m_scene,
                     m_cursor.get());
+
+        onInputFocusChanged();
     }
 
     TextInput::~TextInput()
@@ -578,11 +583,11 @@ namespace raintk
 
             if(sentinel.rtl)
             {
-                sentinel.x1 = sentinel.x0;
+                sentinel.x1 = sentinel.x0-cursor_width.Get();
             }
             else
             {
-                sentinel.x0 = sentinel.x1;
+                sentinel.x0 = sentinel.x1+cursor_width.Get();
             }
         }
 
@@ -617,19 +622,23 @@ namespace raintk
 
         if(glyph.rtl)
         {
-            cursor_x = glyph.x1+m_cursor->width.Get();
+            cursor_x = glyph.x1;
         }
         else
         {
             cursor_x = glyph.x0-m_cursor->width.Get();
         }
 
+        // Because we shift text by cursor_width
+        cursor_x += cursor_width.Get();
+
         float content_cursor_x = m_content_parent->x.Get()+cursor_x;
+        float content_cursor_e = content_cursor_x+cursor_width.Get();
 
         // Adjust the content parent position if required
-        if(content_cursor_x > width.Get())
+        if(content_cursor_e > width.Get())
         {
-            float x_shift = (content_cursor_x - width.Get());
+            float x_shift = (content_cursor_e - width.Get());
             setContentX(m_content_parent->x.Get() - x_shift);
         }
         else if(content_cursor_x < 0.0f)
@@ -677,6 +686,9 @@ namespace raintk
                         (glyph.rtl) ?
                             glyph.x1+cursor_width :
                             glyph.x0-cursor_width;
+
+                // Because we shift text by cursor_width
+                cursor_x += cursor_width;
 
                 if((cursor_x < left_edge) ||
                    (cursor_x > right_edge))

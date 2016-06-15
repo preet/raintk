@@ -66,9 +66,9 @@ namespace raintk
 
         // * The utf16text index the cursor is positioned before
         // * The last cursor position is after the final utf16 index
-        Property<uint> cursor_position;
+        Property<uint> cursor_position{0};
 
-        Property<float> cursor_width;
+        Property<float> cursor_width{2};
 
         Property<glm::u8vec4> cursor_color;
 

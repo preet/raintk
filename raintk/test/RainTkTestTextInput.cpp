@@ -36,7 +36,6 @@ int main(int argc, char* argv[])
 
     auto text_input = MakeWidget<TextInput>(scene,root);
     text_input->name = "text_input";
-    text_input->input_focus = false;
     text_input->width = 300;
     text_input->height = mm(12);
     text_input->x = mm(10);
@@ -47,7 +46,8 @@ int main(int argc, char* argv[])
     text_input->GetInputText()->font = "FiraSansMinimal.ttf";
     text_input->GetInputText()->color = glm::u8vec4{250,250,250,255};
     text_input->GetInputText()->size = mm(12);
-    text_input->GetInputText()->text = "This is a message to those in command";
+    text_input->GetInputText()->text = "This is a messaged to those in command";
+    text_input->clip = true;
 
     Align::BindCenterToAnchorCenter(text_input.get(),root.get());
 
