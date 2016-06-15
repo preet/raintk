@@ -167,8 +167,20 @@ SOURCES += \
     $${PATH_RAINTK}/raintk/RainTkRow.cpp \
     $${PATH_RAINTK}/raintk/RainTkGrid.cpp
 
+# widget (views)
+HEADERS += \
+    $${PATH_RAINTK}/raintk/RainTkListView.hpp
+
+SOURCES += \
+    $${PATH_RAINTK}/raintk/RainTkListView.cpp
+
+
 # test
-DEFINES += RAINTK_DEBUG_TEST_DRAW_SYSTEM
+
+contains(RAINTK_BUILD_INFO_CONFIG,Debug) {
+    DEFINES += RAINTK_DEBUG_TEST_DRAW_SYSTEM
+    DEFINES += RAINTK_DEBUG_LIST_VIEW_GUIDELINES
+}
 
 # test resources
 SOURCES += \
@@ -202,12 +214,12 @@ SOURCES += \
 #    $${PATH_RAINTK}/raintk/test/RainTkTestScrollAreaInputPassThrough2.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestText.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestInputFocus.cpp
-    $${PATH_RAINTK}/raintk/test/RainTkTestTextInput.cpp
+#    $${PATH_RAINTK}/raintk/test/RainTkTestTextInput.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestTextDims.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestPropertiesAndUpdateOrder.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestUpdateHierarchy.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestAlignment.cpp
-#    $${PATH_RAINTK}/raintk/test/RainTkTestListView.cpp
+    $${PATH_RAINTK}/raintk/test/RainTkTestListView.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestDrag.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestImageAtlas.cpp
 #    $${PATH_RAINTK}/raintk/test/RainTkTestOpacityHierarchy.cpp
