@@ -65,6 +65,12 @@ namespace raintk
                     &Row::onChildDimsChanged,
                     ks::ConnectionType::Direct);
 
+        new_item.cid_height =
+                child->height.signal_changed.Connect(
+                    this_row,
+                    &Row::onChildDimsChanged,
+                    ks::ConnectionType::Direct);
+
         // Save in row list
         auto it = m_list_items.insert(
                     m_list_items.end(),
@@ -83,8 +89,8 @@ namespace raintk
         {
             auto it = lkup_it->second;
 
-            it->widget->width.signal_changed.Disconnect(
-                        it->cid_width);
+            it->widget->width.signal_changed.Disconnect(it->cid_width);
+            it->widget->height.signal_changed.Disconnect(it->cid_height);
 
             m_list_items.erase(it);
             m_lkup_id_item_it.erase(lkup_it);
@@ -128,8 +134,8 @@ namespace raintk
         }
 
         float const row_width = left-spacing_val;
-        this->width = row_width;
-        this->height = row_height;
+        children_width = row_width;
+        children_height = row_height;
 
         if(layout_direction.Get() == LayoutDirection::RightToLeft)
         {

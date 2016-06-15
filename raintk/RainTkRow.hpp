@@ -51,6 +51,14 @@ namespace raintk
             0.0f
         };
 
+        Property<float> children_width{
+            0.0f
+        };
+
+        Property<float> children_height{
+            0.0f
+        };
+
         Property<LayoutDirection> layout_direction{
             LayoutDirection::LeftToRight
         };
@@ -70,6 +78,7 @@ namespace raintk
         {
             Widget* widget;
             Id cid_width;
+            Id cid_height;
         };
 
         // TODO replace list if performance is an issue

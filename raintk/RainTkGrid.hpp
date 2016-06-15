@@ -80,6 +80,14 @@ namespace raintk
             0.0f
         };
 
+        Property<float> children_width{
+            0.0f
+        };
+
+        Property<float> children_height{
+            0.0f
+        };
+
     protected:
         void onLayoutChanged();
 

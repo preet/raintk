@@ -226,7 +226,7 @@ namespace raintk
             w += w_acc;
             w_acc = w;
         }
-        this->width = w_acc-row_spacing_val;
+        children_width = w_acc-row_spacing_val;
 
         float h_acc=0;
         for(auto& h : list_row_h)
@@ -234,7 +234,7 @@ namespace raintk
             h += h_acc;
             h_acc = h;
         }
-        this->height = h_acc-col_spacing_val;
+        children_height = h_acc-col_spacing_val;
 
         // Position items
         if(layout_dirn_val == LayoutDirection::LeftToRight ||

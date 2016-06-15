@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 
     rectx->x =
             [&gridref](){
-                return (gridref.width.Get() + mm(5));
+                return (gridref.children_width.Get() + mm(5));
             };
 
     auto resize_timer =
